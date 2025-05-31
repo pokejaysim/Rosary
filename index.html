@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rosary Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #2c3e50;
+            line-height: 1.6;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            50% { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+
+        .header::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 100%);
+            margin: 0 auto;
+            border-radius: 2px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(255, 154, 158, 0.5); }
+            to { box-shadow: 0 0 15px rgba(255, 154, 158, 0.8); }
+        }
+
+        .auth-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .auth-container h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .btn-google, .btn-email, .btn-anonymous {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-google {
+            background: white;
+            color: #4285f4;
+            border: 1px solid #dadce0;
+        }
+
+        .btn-google:hover {
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .btn-email {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-email:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-anonymous {
+            background: rgba(0, 0, 0, 0.05);
+            color: #666;
+        }
+
+        .btn-anonymous:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-info span {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .btn-signout {
+            padding: 8px 16px;
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-signout:hover {
+            background: #e74c3c;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .stats-section:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .stats-display {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .session-restore {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .session-restore h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .session-restore p {
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .session-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-restore {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-restore:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-fresh {
+            background: white;
+            color: #4facfe;
+        }
+
+        .btn-fresh:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+        }
+
+        .mystery-selector {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .mystery-selector:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .mystery-selector h2 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .mystery-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mystery-btn {
+            padding: 14px 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+            color: #4a5568;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mystery-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .mystery-btn:hover::before {
+            left: 100%;
+        }
+
+        .mystery-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .mystery-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .today-mystery {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: white;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3);
+        }
+
+        .prayer-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .prayer-section:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 8px;
+        }
+
+        .progress-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(236, 240, 241, 0.6);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-dot::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .progress-dot.completed {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .progress-dot.current {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            transform: scale(1.4);
+            box-shadow: 0 0 20px rgba(255, 154, 158, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        .progress-dot.current::after {
+            opacity: 1;
+            animation: ripple 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.4); }
+            50% { transform: scale(1.5); }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .current-step {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .step-title {
+            font-size: 1.6rem;
+            font-weight: 400;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .step-subtitle {
+            font-size: 1rem;
+            color: #7f8c8d;
+        }
+
+        .prayer-content {
+            background: linear-gradient(135deg, rgba(248, 249, 250, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            border-left: 4px solid;
+            border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+            transition: all 0.3s ease;
+        }
+
+        .prayer-content:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+        }
+
+        .prayer-text {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #2c3e50;
+        }
+
+        .expandable-prayer {
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .expandable-prayer:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .prayer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(236, 240, 241, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .prayer-header:hover {
+            padding-left: 10px;
+        }
+
+        .prayer-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+
+        .expand-icon {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .prayer-full-text {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+            display: none;
+        }
+
+        .prayer-full-text.expanded {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .mystery-info {
+            background: linear-gradient(135deg, rgba(232, 244, 253, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+            border-left: 4px solid;
+            border-image: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1;
+            transition: all 0.3s ease;
+        }
+
+        .mystery-info:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.15);
+        }
+
+        .mystery-name {
+            font-weight: 500;
+            color: #2980b9;
+            margin-bottom: 5px;
+        }
+
+        .mystery-virtue {
+            font-size: 0.9rem;
+            color: #34495e;
+        }
+
+        .completion-message {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .completion-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.1) 50%, transparent 51%);
+            animation: shine 3s infinite;
+        }
+
+        .completion-message h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .completion-message p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rosary Companion</h1>
+        </div>
+
+        <div class="auth-section" id="authSection">
+            <div class="auth-container">
+                <h3>Sign in to save your progress</h3>
+                <button class="btn-google" onclick="signInWithGoogle()">
+                    <img src="https://www.google.com/favicon.ico" alt="Google"> 
+                    Sign in with Google
+                </button>
+                <button class="btn-email" onclick="showEmailLogin()">
+                    ✉️ Sign in with Email
+                </button>
+                <button class="btn-anonymous" onclick="continueAsGuest()">
+                    👤 Continue as Guest
+                </button>
+            </div>
+        </div>
+
+        <div class="user-info" id="userInfo" style="display: none;">
+            <span id="userName"></span>
+            <button class="btn-signout" onclick="signOut()">Sign Out</button>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-display" id="statsDisplay">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalRosaries">0</span>
+                    <span class="stat-label">Total Rosaries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="dayStreak">0</span>
+                    <span class="stat-label">Day Streak</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="session-restore" id="sessionRestore" style="display: none;">
+            <h3>Welcome Back! 🙏</h3>
+            <p>You have an unfinished rosary from earlier. Would you like to continue where you left off?</p>
+            <div class="session-buttons">
+                <button class="btn-small btn-restore" onclick="continueSession()">Continue</button>
+                <button class="btn-small btn-fresh" onclick="startFresh()">Start Fresh</button>
+            </div>
+        </div>
+
+        <div class="mystery-selector" id="mysterySelector">
+            <h2>Select Mystery</h2>
+            <div class="today-mystery" id="todayMystery">
+                Today's Mystery: Joyful Mysteries (Monday)
+            </div>
+            <br>
+            <div class="mystery-buttons">
+                <button class="mystery-btn active" data-mystery="joyful" onclick="selectMystery('joyful')">Joyful</button>
+                <button class="mystery-btn" data-mystery="sorrowful" onclick="selectMystery('sorrowful')">Sorrowful</button>
+                <button class="mystery-btn" data-mystery="glorious" onclick="selectMystery('glorious')">Glorious</button>
+                <button class="mystery-btn" data-mystery="luminous" onclick="selectMystery('luminous')">Luminous</button>
+            </div>
+        </div>
+
+        <div class="prayer-section" id="prayerSection">
+            <div class="progress-indicator">
+                <div class="progress-dot current" data-step="0"></div>
+                <div class="progress-dot" data-step="1"></div>
+                <div class="progress-dot" data-step="2"></div>
+                <div class="progress-dot" data-step="3"></div>
+                <div class="progress-dot" data-step="4"></div>
+                <div class="progress-dot" data-step="5"></div>
+                <div class="progress-dot" data-step="6"></div>
+                <div class="progress-dot" data-step="7"></div>
+            </div>
+            <div class="progress-label" id="progressLabel">Opening Prayers</div>
+
+            <div class="current-step">
+                <div class="step-title" id="stepTitle">Opening Prayers</div>
+                <div class="step-subtitle" id="stepSubtitle">Begin with the Sign of the Cross</div>
+            </div>
+
+            <div id="mysteryInfo" class="mystery-info" style="display: none;">
+                <div class="mystery-name" id="currentMysteryName"></div>
+                <div class="mystery-virtue" id="currentMysteryVirtue"></div>
+            </div>
+
+            <div class="prayer-content" id="prayerContent">
+                <!-- Content will be dynamically updated -->
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()">Previous</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Continue</button>
+            </div>
+        </div>
+
+        <div class="prayer-section" id="completionMessage" style="display: none;">
+            <div class="completion-message">
+                <h2>Rosary Complete! 🙏</h2>
+                <p>May the peace of Christ be with you</p>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="resetRosary()">Start New Rosary</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            signInAnonymously,
+            onAuthStateChanged,
+            signOut as firebaseSignOut
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            updateDoc,
+            serverTimestamp,
+            arrayUnion,
+            increment,
+            deleteField
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUpyuXLST_okNuDawiN3HTB2gvNmAa_u0",
+            authDomain: "rosary-companion-5fbb7.firebaseapp.com",
+            projectId: "rosary-companion-5fbb7",
+            storageBucket: "rosary-companion-5fbb7.firebasestorage.app",
+            messagingSenderId: "389748583800",
+            appId: "1:389748583800:web:2f7c2973adf0b30af92c8d"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Make functions global for onclick handlers
+        window.signInWithGoogle = signInWithGoogle;
+        window.showEmailLogin = showEmailLogin;
+        window.continueAsGuest = continueAsGuest;
+        window.signOut = signOut;
+        window.continueSession = continueSession;
+        window.startFresh = startFresh;
+        window.selectMystery = selectMystery;
+        window.togglePrayer = togglePrayer;
+        window.nextStep = nextStep;
+        window.previousStep = previousStep;
+        window.resetRosary = resetRosary;
+
+        // Current user
+        let currentUser = null;
+
+        // Rosary data
+        const mysteries = {
+            joyful: [
+                { name: "The Annunciation", virtue: "Humility", reference: "(Luke 1:26-38; John 1:14)" },
+                { name: "The Visitation", virtue: "Charity", reference: "(Luke 1:39-56)" },
+                { name: "The Nativity", virtue: "Poverty", reference: "(Luke 2:6-20; Matt 1:18-25)" },
+                { name: "The Presentation", virtue: "Obedience", reference: "(Luke 2:22-39)" },
+                { name: "Finding Jesus in the Temple", virtue: "Joy/Prudence", reference: "(Luke 2:41-51)" }
+            ],
+            sorrowful: [
+                { name: "Agony in the Garden", virtue: "Repentance", reference: "(Matt 26:36-46; Luke 22:39-46)" },
+                { name: "Scourging at the Pillar", virtue: "Purity", reference: "(Matt 27:26; John 19:1)" },
+                { name: "Crowning with Thorns", virtue: "Courage", reference: "(Matt 27:29-30; John 19:2-3)" },
+                { name: "Carrying of the Cross", virtue: "Patience", reference: "(Luke 23:26-32)" },
+                { name: "Crucifixion", virtue: "Mercy", reference: "(Luke 23:33-46)" }
+            ],
+            glorious: [
+                { name: "The Resurrection", virtue: "Faith", reference: "(Matt 28:1-10; John 20:1-29)" },
+                { name: "The Ascension", virtue: "Hope", reference: "(Mark 16:19-20; Acts 1:6-11)" },
+                { name: "Descent of the Holy Spirit", virtue: "Love", reference: "(Acts 2:1-41)" },
+                { name: "The Assumption", virtue: "Grace of a happy death", reference: "(Rev 12:1)" },
+                { name: "Coronation of Mary", virtue: "True devotion to Mary", reference: "(Rev 12:1)" }
+            ],
+            luminous: [
+                { name: "Baptism of Jesus", virtue: "Fidelity", reference: "(Matt 3:11-17; Luke 3:15-22; John 1:22-34)" },
+                { name: "Wedding at Cana", virtue: "Faith in Mary's Intercession", reference: "(John 2:1-12)" },
+                { name: "Proclamation of the Kingdom", virtue: "Conversion", reference: "(Mark 1:14-15; Matt 5-7)" },
+                { name: "Transfiguration", virtue: "Renewal in Christ", reference: "(Luke 9:28-36; Matt 17:1-8)" },
+                { name: "Institution of the Eucharist", virtue: "Love of the Eucharist", reference: "(Matt 26:26-28; John 6:33-59)" }
+            ]
+        };
+
+        let currentStep = 0;
+        let currentMystery = 'joyful';
+        let currentDecade = 0;
+        let completedRosaries = 0;
+        let currentStreak = 0;
+        let sessionData = {
+            currentStep: 0,
+            currentMystery: 'joyful',
+            currentDecade: 0,
+            completedRosaries: 0,
+            currentStreak: 0,
+            lastCompletedDate: null,
+            timestamp: Date.now()
+        };
+
+        const steps = [
+            "Opening Prayers",
+            "First Decade", 
+            "Second Decade", 
+            "Third Decade", 
+            "Fourth Decade", 
+            "Fifth Decade",
+            "Closing Prayers",
+            "Complete"
+        ];
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // User is signed in
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('userName').textContent = 
+                    user.displayName || user.email || 'Guest User';
+                
+                // Load user data from Firestore
+                loadUserData();
+            } else {
+                // User is signed out
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
+            }
+        });
+
+        // Sign in with Google
+        async function signInWithGoogle() {
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error('Error signing in with Google:', error);
+                alert('Failed to sign in. Please try again.');
+            }
+        }
+
+        // Show email login (placeholder for now)
+        function showEmailLogin() {
+            alert('Email login coming soon! Please use Google sign-in or continue as guest.');
+        }
+
+        // Continue as guest (anonymous auth)
+        async function continueAsGuest() {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error('Error with anonymous auth:', error);
+            }
+        }
+
+        // Sign out
+        async function signOut() {
+            try {
+                await firebaseSignOut(auth);
+                // Reset to default state
+                completedRosaries = 0;
+                currentStreak = 0;
+                updateStats();
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        }
+
+        // Load user data from Firestore
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                
+                if (userDoc.exists()) {
+                    const data = userDoc.data().rosaryData || {};
+                    completedRosaries = data.totalCompleted || 0;
+                    currentStreak = data.currentStreak || 0;
+                    
+                    // Check for unfinished session
+                    if (data.currentSession) {
+                        const session = data.currentSession;
+                        if (Date.now() - session.startedAt < 3600000) { // Within 1 hour
+                            sessionData = {
+                                currentStep: session.step,
+                                currentMystery: session.mystery,
+                                currentDecade: session.decade,
+                                timestamp: session.startedAt
+                            };
+                            document.getElementById('sessionRestore').style.display = 'block';
+                        }
+                    }
+                    
+                    updateStats();
+                } else {
+                    // Create new user document
+                    await setDoc(doc(db, 'users', currentUser.uid), {
+                        profile: {
+                            email: currentUser.email,
+                            displayName: currentUser.displayName,
+                            createdAt: serverTimestamp()
+                        },
+                        rosaryData: {
+                            totalCompleted: 0,
+                            currentStreak: 0,
+                            longestStreak: 0,
+                            completionHistory: []
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Save progress to Firestore
+        async function saveProgress() {
+            if (!currentUser) {
+                // Fall back to memory for non-authenticated users
+                sessionData = {
+                    currentStep,
+                    currentMystery,
+                    currentDecade,
+                    timestamp: Date.now()
+                };
+                return;
+            }
+            
+            try {
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    'rosaryData.currentSession': {
+                        step: currentStep,
+                        mystery: currentMystery,
+                        decade: currentDecade,
+                        startedAt: Date.now()
+                    }
+                });
+            } catch (error) {
+                console.error('Error saving progress:', error);
+            }
+        }
+
+        // Complete rosary and save to Firestore
+        async function completeRosary() {
+            completedRosaries++;
+            
+            // Update streak logic
+            const today = new Date().toDateString();
+            const lastCompleted = sessionData.lastCompletedDate;
+            
+            if (!lastCompleted || lastCompleted !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastCompleted === yesterday.toDateString()) {
+                    currentStreak++;
+                } else {
+                    currentStreak = 1;
+                }
+            }
+            
+            updateStats();
+            
+            // Save to Firestore if user is authenticated
+            if (currentUser) {
+                try {
+                    const userRef = doc(db, 'users', currentUser.uid);
+                    const userDoc = await getDoc(userRef);
+                    const currentData = userDoc.data()?.rosaryData || {};
+                    const longestStreak = Math.max(currentStreak, currentData.longestStreak || 0);
+                    
+                    await updateDoc(userRef, {
+                        'rosaryData.totalCompleted': completedRosaries,
+                        'rosaryData.currentStreak': currentStreak,
+                        'rosaryData.longestStreak': longestStreak,
+                        'rosaryData.lastCompletedDate': today,
+                        'rosaryData.currentSession': deleteField(),
+                        'rosaryData.completionHistory': arrayUnion({
+                            date: today,
+                            mystery: currentMystery,
+                            completedAt: serverTimestamp()
+                        })
+                    });
+                    
+                    // Update global statistics
+                    updateGlobalStats();
+                } catch (error) {
+                    console.error('Error saving completion:', error);
+                }
+            }
+        }
+
+        // Update global statistics
+        async function updateGlobalStats() {
+            try {
+                const globalRef = doc(db, 'global', 'stats');
+                await updateDoc(globalRef, {
+                    totalRosariesPrayed: increment(1),
+                    lastUpdated: serverTimestamp()
+                });
+            } catch (error) {
+                // Create the document if it doesn't exist
+                await setDoc(doc(db, 'global', 'stats'), {
+                    totalRosariesPrayed: 1,
+                    lastUpdated: serverTimestamp()
+                });
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTodaysMystery();
+            updateUI();
+        });
+
+        // Continue session
+        function continueSession() {
+            currentStep = sessionData.currentStep;
+            currentMystery = sessionData.currentMystery;
+            currentDecade = sessionData.currentDecade;
+            document.getElementById('sessionRestore').style.display = 'none';
+            updateUI();
+        }
+
+        // Start fresh
+        function startFresh() {
+            currentStep = 0;
+            currentDecade = 0;
+            document.getElementById('sessionRestore').style.display = 'none';
+            saveProgress();
+            updateUI();
+        }
+
+        // Update stats display
+        function updateStats() {
+            document.getElementById('totalRosaries').textContent = completedRosaries;
+            document.getElementById('dayStreak').textContent = currentStreak;
+        }
+
+        // Update today's mystery
+        function updateTodaysMystery() {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayMysteries = {
+                'Sunday': { name: 'Glorious', type: 'glorious' },
+                'Monday': { name: 'Joyful', type: 'joyful' },
+                'Tuesday': { name: 'Sorrowful', type: 'sorrowful' },
+                'Wednesday': { name: 'Glorious', type: 'glorious' },
+                'Thursday': { name: 'Luminous', type: 'luminous' },
+                'Friday': { name: 'Sorrowful', type: 'sorrowful' },
+                'Saturday': { name: 'Joyful', type: 'joyful' }
+            };
+            
+            const today = new Date().getDay();
+            const todayName = days[today];
+            const todayMystery = dayMysteries[todayName];
+            
+            document.getElementById('todayMystery').textContent = 
+                `Today's Mystery: ${todayMystery.name} Mysteries (${todayName})`;
+        }
+
+        // Select mystery
+        function selectMystery(mystery) {
+            currentMystery = mystery;
+            document.querySelectorAll('.mystery-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mystery="${mystery}"]`).classList.add('active');
+            saveProgress();
+        }
+
+        // Toggle prayer visibility
+        function togglePrayer(prayerId) {
+            const prayerText = document.getElementById(prayerId);
+            const icon = document.getElementById(prayerId + 'Icon');
+            
+            prayerText.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+                dot.classList.remove('current', 'completed');
+                if (index < currentStep) {
+                    dot.classList.add('completed');
+                } else if (index === currentStep) {
+                    dot.classList.add('current');
+                }
+            });
+
+            // Update progress label
+            document.getElementById('progressLabel').textContent = steps[currentStep];
+
+            // Update step title and subtitle
+            const stepTitle = document.getElementById('stepTitle');
+            const stepSubtitle = document.getElementById('stepSubtitle');
+            const mysteryInfo = document.getElementById('mysteryInfo');
+            const prayerContent = document.getElementById('prayerContent');
+
+            // Hide/show sections based on step
+            if (currentStep === 7) {
+                document.getElementById('prayerSection').style.display = 'none';
+                document.getElementById('completionMessage').style.display = 'block';
+                document.getElementById('mysterySelector').style.display = 'none';
+                return;
+            } else {
+                document.getElementById('prayerSection').style.display = 'block';
+                document.getElementById('completionMessage').style.display = 'none';
+            }
+
+            // Update content based on current step
+            switch(currentStep) {
+                case 0: // Opening Prayers
+                    stepTitle.textContent = "Opening Prayers";
+                    stepSubtitle.textContent = "Begin with the Sign of the Cross";
+                    mysteryInfo.style.display = 'none';
+                    prayerContent.innerHTML = `
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('apostlesCreed')">
+                                <span class="prayer-title">The Apostles' Creed</span>
+                                <span class="expand-icon" id="apostlesCreedIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="apostlesCreed">
+                                <div class="prayer-text">
+                                    I believe in God, the Father Almighty,<br>
+                                    Creator of heaven and earth;<br>
+                                    and in Jesus Christ, His only Son, our Lord,<br>
+                                    who was conceived by the Holy Spirit,<br>
+                                    born of the Virgin Mary,<br>
+                                    suffered under Pontius Pilate,<br>
+                                    was crucified, died and was buried.<br>
+                                    He descended into hell;<br>
+                                    on the third day He rose again from the dead;<br>
+                                    He ascended into heaven,<br>
+                                    and is seated at the right hand of God the Father Almighty;<br>
+                                    from there He will come to judge the living and the dead.<br>
+                                    I believe in the Holy Spirit,<br>
+                                    the holy Catholic Church,<br>
+                                    the communion of saints,<br>
+                                    the forgiveness of sins,<br>
+                                    the resurrection of the body,<br>
+                                    and life everlasting. Amen.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('ourFather')">
+                                <span class="prayer-title">Our Father</span>
+                                <span class="expand-icon" id="ourFatherIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="ourFather">
+                                <div class="prayer-text">
+                                    Our Father, who art in heaven,<br>
+                                    hallowed be thy name;<br>
+                                    thy kingdom come,<br>
+                                    thy will be done<br>
+                                    on earth as it is in heaven.<br>
+                                    Give us this day our daily bread,<br>
+                                    and forgive us our trespasses,<br>
+                                    as we forgive those who trespass against us;<br>
+                                    and lead us not into temptation,<br>
+                                    but deliver us from evil. Amen.
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="prayer-text">Then pray 3 Hail Marys and 1 Glory Be</p>
+                    `;
+                    break;
+                
+                case 1: case 2: case 3: case 4: case 5: // Decades
+                    const decadeNum = currentStep - 1;
+                    const mystery = mysteries[currentMystery][decadeNum];
+                    currentDecade = decadeNum;
+                    
+                    stepTitle.textContent = `${ordinal(decadeNum + 1)} Mystery`;
+                    stepSubtitle.textContent = mystery.name;
+                    
+                    mysteryInfo.style.display = 'block';
+                    document.getElementById('currentMysteryName').textContent = 
+                        `${mystery.name} ${mystery.reference}`;
+                    document.getElementById('currentMysteryVirtue').textContent = 
+                        `Virtue: ${mystery.virtue}`;
+                    
+                    prayerContent.innerHTML = `
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('ourFatherDecade')">
+                                <span class="prayer-title">Our Father</span>
+                                <span class="expand-icon" id="ourFatherDecadeIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="ourFatherDecade">
+                                <div class="prayer-text">
+                                    Our Father, who art in heaven,<br>
+                                    hallowed be thy name;<br>
+                                    thy kingdom come,<br>
+                                    thy will be done<br>
+                                    on earth as it is in heaven.<br>
+                                    Give us this day our daily bread,<br>
+                                    and forgive us our trespasses,<br>
+                                    as we forgive those who trespass against us;<br>
+                                    and lead us not into temptation,<br>
+                                    but deliver us from evil. Amen.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('hailMary')">
+                                <span class="prayer-title">Hail Mary (10 times)</span>
+                                <span class="expand-icon" id="hailMaryIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="hailMary">
+                                <div class="prayer-text">
+                                    Hail Mary, full of grace,<br>
+                                    the Lord is with thee;<br>
+                                    blessed art thou among women,<br>
+                                    and blessed is the fruit of thy womb, Jesus.<br>
+                                    Holy Mary, Mother of God,<br>
+                                    pray for us sinners,<br>
+                                    now and at the hour of our death. Amen.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('gloryBe')">
+                                <span class="prayer-title">Glory Be</span>
+                                <span class="expand-icon" id="gloryBeIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="gloryBe">
+                                <div class="prayer-text">
+                                    Glory be to the Father,<br>
+                                    and to the Son,<br>
+                                    and to the Holy Spirit,<br>
+                                    as it was in the beginning,<br>
+                                    is now, and ever shall be,<br>
+                                    world without end. Amen.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('fatimaPrayer')">
+                                <span class="prayer-title">Fatima Prayer</span>
+                                <span class="expand-icon" id="fatimaPrayerIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="fatimaPrayer">
+                                <div class="prayer-text">
+                                    O my Jesus, forgive us our sins,<br>
+                                    save us from the fires of hell,<br>
+                                    lead all souls to Heaven,<br>
+                                    especially those in most need of Thy mercy. Amen.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                
+                case 6: // Closing Prayers
+                    stepTitle.textContent = "Closing Prayers";
+                    stepSubtitle.textContent = "Conclude the Rosary";
+                    mysteryInfo.style.display = 'none';
+                    prayerContent.innerHTML = `
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('hailHolyQueen')">
+                                <span class="prayer-title">Hail Holy Queen</span>
+                                <span class="expand-icon" id="hailHolyQueenIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="hailHolyQueen">
+                                <div class="prayer-text">
+                                    Hail, holy Queen, Mother of mercy,<br>
+                                    our life, our sweetness and our hope.<br>
+                                    To thee do we cry, poor banished children of Eve:<br>
+                                    to thee do we send up our sighs,<br>
+                                    mourning and weeping in this valley of tears.<br>
+                                    Turn then, most gracious Advocate,<br>
+                                    thine eyes of mercy toward us,<br>
+                                    and after this our exile,<br>
+                                    show unto us the blessed fruit of thy womb, Jesus,<br>
+                                    O merciful, O loving, O sweet Virgin Mary!<br><br>
+                                    Pray for us, O Holy Mother of God,<br>
+                                    that we may be made worthy of the promises of Christ. Amen.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="expandable-prayer">
+                            <div class="prayer-header" onclick="togglePrayer('finalPrayer')">
+                                <span class="prayer-title">Final Prayer</span>
+                                <span class="expand-icon" id="finalPrayerIcon">▼</span>
+                            </div>
+                            <div class="prayer-full-text" id="finalPrayer">
+                                <div class="prayer-text">
+                                    Let us pray.<br>
+                                    O God, whose only begotten Son,<br>
+                                    by His life, death, and resurrection,<br>
+                                    has purchased for us the rewards of eternal life,<br>
+                                    grant, we beseech Thee,<br>
+                                    that meditating upon these mysteries<br>
+                                    of the Most Holy Rosary of the Blessed Virgin Mary,<br>
+                                    we may imitate what they contain<br>
+                                    and obtain what they promise,<br>
+                                    through the same Christ Our Lord. Amen.
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="prayer-text">End with the Sign of the Cross</p>
+                    `;
+                    break;
+            }
+
+            // Update button states
+            document.getElementById('prevBtn').style.display = currentStep === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').textContent = currentStep === 6 ? 'Complete' : 'Continue';
+            
+            saveProgress();
+        }
+
+        // Next step
+        function nextStep() {
+            if (currentStep < 7) {
+                currentStep++;
+                updateUI();
+                
+                if (currentStep === 7) {
+                    completeRosary();
+                }
+            }
+        }
+
+        // Previous step
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        // Reset rosary
+        function resetRosary() {
+            currentStep = 0;
+            currentDecade = 0;
+            document.getElementById('prayerSection').style.display = 'block';
+            document.getElementById('completionMessage').style.display = 'none';
+            document.getElementById('mysterySelector').style.display = 'block';
+            updateUI();
+        }
+
+        // Ordinal helper
+        function ordinal(n) {
+            const s = ["th", "st", "nd", "rd"];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+    </script>
+</body>
+</html>
