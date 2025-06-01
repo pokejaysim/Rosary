@@ -960,18 +960,24 @@
                     const data = userDoc.data().rosaryData || {};
                     completedRosaries = data.totalCompleted || 0;
                     currentStreak = data.currentStreak || 0;
+                    sessionData.lastCompletedDate = data.lastCompletedDate;
                     
                     // Check for unfinished session
-                    if (data.currentSession) {
+                    if (data.currentSession && data.currentSession.step !== undefined) {
                         const session = data.currentSession;
-                        if (Date.now() - session.startedAt < 3600000) { // Within 1 hour
+                        // Check if session is less than 24 hours old (increased from 1 hour)
+                        if (Date.now() - session.startedAt < 86400000) { // Within 24 hours
                             sessionData = {
                                 currentStep: session.step,
                                 currentMystery: session.mystery,
-                                currentDecade: session.decade,
-                                timestamp: session.startedAt
+                                currentDecade: session.decade || 0,
+                                timestamp: session.startedAt,
+                                lastCompletedDate: data.lastCompletedDate
                             };
-                            document.getElementById('sessionRestore').style.display = 'block';
+                            // Only show restore if not on first step
+                            if (session.step > 0 && session.step < 7) {
+                                document.getElementById('sessionRestore').style.display = 'block';
+                            }
                         }
                     }
                     
@@ -1011,14 +1017,18 @@
             }
             
             try {
+                const sessionUpdate = {
+                    step: currentStep,
+                    mystery: currentMystery,
+                    decade: currentDecade,
+                    startedAt: Date.now()
+                };
+                
                 await updateDoc(doc(db, 'users', currentUser.uid), {
-                    'rosaryData.currentSession': {
-                        step: currentStep,
-                        mystery: currentMystery,
-                        decade: currentDecade,
-                        startedAt: Date.now()
-                    }
+                    'rosaryData.currentSession': sessionUpdate
                 });
+                
+                console.log('Progress saved:', sessionUpdate);
             } catch (error) {
                 console.error('Error saving progress:', error);
             }
@@ -1099,11 +1109,17 @@
 
         // Continue session
         function continueSession() {
-            currentStep = sessionData.currentStep;
-            currentMystery = sessionData.currentMystery;
-            currentDecade = sessionData.currentDecade;
-            document.getElementById('sessionRestore').style.display = 'none';
-            updateUI();
+            if (sessionData.currentStep !== undefined) {
+                currentStep = sessionData.currentStep;
+                currentMystery = sessionData.currentMystery || 'joyful';
+                currentDecade = sessionData.currentDecade || 0;
+                
+                // Update the mystery selector to match
+                selectMystery(currentMystery);
+                
+                document.getElementById('sessionRestore').style.display = 'none';
+                updateUI();
+            }
         }
 
         // Start fresh
