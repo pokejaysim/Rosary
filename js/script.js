@@ -380,8 +380,11 @@ function selectMystery(mystery) {
     currentMystery = mystery;
     document.querySelectorAll('.mystery-btn').forEach(btn => {
         btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
     });
-    document.querySelector(`[data-mystery="${mystery}"]`).classList.add('active');
+    const selectedBtn = document.querySelector(`[data-mystery="${mystery}"]`);
+    selectedBtn.classList.add('active');
+    selectedBtn.setAttribute('aria-selected', 'true');
     saveProgress();
 }
 
@@ -396,7 +399,12 @@ function togglePrayer(prayerId) {
 
 // Update UI
 function updateUI() {
-    // Update progress dots
+    // Update progress dots and progress bar
+    const progressBar = document.querySelector('.progress-indicator');
+    if (progressBar) {
+        progressBar.setAttribute('aria-valuenow', currentStep.toString());
+    }
+    
     document.querySelectorAll('.progress-dot').forEach((dot, index) => {
         dot.classList.remove('current', 'completed');
         if (index < currentStep) {

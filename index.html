@@ -3,49 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rosary Companion</title>
+    <meta name="description" content="Interactive Rosary Companion - Pray the Holy Rosary with guided mysteries, progress tracking, and daily recommendations.">
+    <meta name="keywords" content="rosary, prayer, catholic, mysteries, holy rosary, spiritual, meditation">
+    <meta name="author" content="Rosary Companion">
+    <meta property="og:title" content="Rosary Companion - Interactive Prayer Guide">
+    <meta property="og:description" content="Pray the Holy Rosary with our interactive companion featuring guided mysteries and progress tracking.">
+    <meta property="og:type" content="website">
+    <title>Rosary Companion - Interactive Prayer Guide</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <header class="header">
+        <div class="container">
             <h1>Rosary Companion</h1>
+            <nav aria-label="Prayer progress navigation" class="sr-only">
+                <!-- Navigation will be handled by the step indicator -->
+            </nav>
         </div>
+    </header>
+    
+    <main class="container">
 
-        <div class="auth-section" id="authSection">
+        <section class="auth-section" id="authSection" aria-labelledby="auth-heading">
             <div class="auth-container">
-                <h3>Sign in to save your progress</h3>
-                <button class="btn-google" onclick="signInWithGoogle()">
-                    <img src="https://www.google.com/favicon.ico" alt="Google"> 
+                <h2 id="auth-heading">Sign in to save your progress</h2>
+                <button class="btn-google" onclick="signInWithGoogle()" aria-label="Sign in with Google account">
+                    <img src="https://www.google.com/favicon.ico" alt="Google logo"> 
                     Sign in with Google
                 </button>
-                <button class="btn-email" onclick="showEmailLogin()">
+                <button class="btn-email" onclick="showEmailLogin()" aria-label="Sign in with email address">
                     ✉️ Sign in with Email
                 </button>
-                <button class="btn-anonymous" onclick="continueAsGuest()">
+                <button class="btn-anonymous" onclick="continueAsGuest()" aria-label="Continue without signing in">
                     👤 Continue as Guest
                 </button>
             </div>
-        </div>
+        </section>
 
-        <div class="user-info" id="userInfo" style="display: none;">
-            <span id="userName"></span>
-            <button class="btn-signout" onclick="signOut()">Sign Out</button>
-        </div>
+        <section class="user-info" id="userInfo" style="display: none;" aria-labelledby="user-greeting">
+            <span id="userName" aria-label="Current user"></span>
+            <button class="btn-signout" onclick="signOut()" aria-label="Sign out of account">Sign Out</button>
+        </section>
 
-        <div class="stats-section">
+        <section class="stats-section" aria-labelledby="stats-heading">
+            <h2 class="sr-only" id="stats-heading">Prayer Statistics</h2>
             <div class="stats-display" id="statsDisplay">
                 <div class="stat-item">
-                    <span class="stat-number" id="totalRosaries">0</span>
+                    <span class="stat-number" id="totalRosaries" aria-label="Total completed rosaries">0</span>
                     <span class="stat-label">Total Rosaries</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number" id="dayStreak">0</span>
+                    <span class="stat-number" id="dayStreak" aria-label="Current daily prayer streak">0</span>
                     <span class="stat-label">Day Streak</span>
                 </div>
             </div>
-        </div>
+        </section>
 
         <div class="session-restore" id="sessionRestore" style="display: none;">
             <h3>Welcome Back! 🙏</h3>
@@ -56,63 +69,63 @@
             </div>
         </div>
 
-        <div class="mystery-selector" id="mysterySelector">
-            <h2>Select Mystery</h2>
-            <div class="today-mystery" id="todayMystery">
+        <section class="mystery-selector" id="mysterySelector" aria-labelledby="mystery-heading">
+            <h2 id="mystery-heading">Select Mystery</h2>
+            <div class="today-mystery" id="todayMystery" role="status" aria-live="polite">
                 Today's Mystery: Joyful Mysteries (Monday)
             </div>
             <br>
-            <div class="mystery-buttons">
-                <button class="mystery-btn active" data-mystery="joyful" onclick="selectMystery('joyful')">Joyful</button>
-                <button class="mystery-btn" data-mystery="sorrowful" onclick="selectMystery('sorrowful')">Sorrowful</button>
-                <button class="mystery-btn" data-mystery="glorious" onclick="selectMystery('glorious')">Glorious</button>
-                <button class="mystery-btn" data-mystery="luminous" onclick="selectMystery('luminous')">Luminous</button>
+            <div class="mystery-buttons" role="tablist" aria-label="Choose rosary mystery type">
+                <button class="mystery-btn active" data-mystery="joyful" onclick="selectMystery('joyful')" role="tab" aria-selected="true" aria-controls="prayer-content">Joyful</button>
+                <button class="mystery-btn" data-mystery="sorrowful" onclick="selectMystery('sorrowful')" role="tab" aria-selected="false" aria-controls="prayer-content">Sorrowful</button>
+                <button class="mystery-btn" data-mystery="glorious" onclick="selectMystery('glorious')" role="tab" aria-selected="false" aria-controls="prayer-content">Glorious</button>
+                <button class="mystery-btn" data-mystery="luminous" onclick="selectMystery('luminous')" role="tab" aria-selected="false" aria-controls="prayer-content">Luminous</button>
             </div>
-        </div>
+        </section>
 
-        <div class="prayer-section" id="prayerSection">
-            <div class="progress-indicator">
-                <div class="progress-dot current" data-step="0"></div>
-                <div class="progress-dot" data-step="1"></div>
-                <div class="progress-dot" data-step="2"></div>
-                <div class="progress-dot" data-step="3"></div>
-                <div class="progress-dot" data-step="4"></div>
-                <div class="progress-dot" data-step="5"></div>
-                <div class="progress-dot" data-step="6"></div>
-                <div class="progress-dot" data-step="7"></div>
+        <section class="prayer-section" id="prayerSection" aria-labelledby="prayer-heading">
+            <div class="progress-indicator" role="progressbar" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0" aria-label="Rosary progress">
+                <div class="progress-dot current" data-step="0" aria-label="Step 1: Opening prayers"></div>
+                <div class="progress-dot" data-step="1" aria-label="Step 2: First decade"></div>
+                <div class="progress-dot" data-step="2" aria-label="Step 3: Second decade"></div>
+                <div class="progress-dot" data-step="3" aria-label="Step 4: Third decade"></div>
+                <div class="progress-dot" data-step="4" aria-label="Step 5: Fourth decade"></div>
+                <div class="progress-dot" data-step="5" aria-label="Step 6: Fifth decade"></div>
+                <div class="progress-dot" data-step="6" aria-label="Step 7: Closing prayers"></div>
+                <div class="progress-dot" data-step="7" aria-label="Step 8: Complete"></div>
             </div>
-            <div class="progress-label" id="progressLabel">Opening Prayers</div>
+            <div class="progress-label" id="progressLabel" aria-live="polite">Opening Prayers</div>
 
             <div class="current-step">
-                <div class="step-title" id="stepTitle">Opening Prayers</div>
-                <div class="step-subtitle" id="stepSubtitle">Begin with the Sign of the Cross</div>
+                <h2 class="step-title" id="stepTitle">Opening Prayers</h2>
+                <p class="step-subtitle" id="stepSubtitle">Begin with the Sign of the Cross</p>
             </div>
 
-            <div id="mysteryInfo" class="mystery-info" style="display: none;">
-                <div class="mystery-name" id="currentMysteryName"></div>
-                <div class="mystery-virtue" id="currentMysteryVirtue"></div>
-            </div>
+            <aside id="mysteryInfo" class="mystery-info" style="display: none;" aria-labelledby="current-mystery">
+                <h3 class="mystery-name" id="currentMysteryName"></h3>
+                <p class="mystery-virtue" id="currentMysteryVirtue"></p>
+            </aside>
 
-            <div class="prayer-content" id="prayerContent">
+            <article class="prayer-content" id="prayerContent" role="tabpanel" aria-labelledby="stepTitle">
                 <!-- Content will be dynamically updated -->
-            </div>
+            </article>
 
-            <div class="controls">
-                <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()">Previous</button>
-                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Continue</button>
+            <div class="controls" role="group" aria-label="Prayer navigation">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()" aria-label="Go to previous prayer step">Previous</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()" aria-label="Continue to next prayer step">Continue</button>
             </div>
-        </div>
+        </section>
 
-        <div class="prayer-section" id="completionMessage" style="display: none;">
-            <div class="completion-message">
-                <h2>Rosary Complete! 🙏</h2>
+        <section class="prayer-section" id="completionMessage" style="display: none;" aria-labelledby="completion-heading">
+            <div class="completion-message" role="alert" aria-live="assertive">
+                <h2 id="completion-heading">Rosary Complete! 🙏</h2>
                 <p>May the peace of Christ be with you</p>
             </div>
             <div class="controls">
-                <button class="btn btn-primary" onclick="resetRosary()">Start New Rosary</button>
+                <button class="btn btn-primary" onclick="resetRosary()" aria-label="Begin a new rosary prayer session">Start New Rosary</button>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script type="module" src="js/script.js"></script>
 </body>

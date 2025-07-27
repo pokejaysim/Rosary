@@ -25,6 +25,187 @@ body {
     padding: 20px;
 }
 
+/* Enhanced Visual Design */
+.auth-section,
+.stats-section,
+.mystery-selector,
+.prayer-section {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+.auth-section::before,
+.stats-section::before,
+.mystery-selector::before,
+.prayer-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #4facfe 100%);
+    border-radius: 16px 16px 0 0;
+}
+
+/* Enhanced button styles */
+.btn,
+.mystery-btn,
+.btn-google,
+.btn-email,
+.btn-anonymous {
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+}
+
+/* Improved typography */
+h1, h2, h3 {
+    line-height: 1.2;
+}
+
+.step-title {
+    margin-bottom: 0.5rem;
+}
+
+.step-subtitle {
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .mystery-buttons {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .mystery-btn {
+        padding: 12px 14px;
+        font-size: 0.9rem;
+    }
+    
+    .controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+    }
+    
+    .stats-display {
+        gap: 20px;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .prayer-section {
+        padding: 25px;
+    }
+    
+    .mystery-selector {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+    
+    .mystery-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-display {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .prayer-section {
+        padding: 20px;
+    }
+    
+    .mystery-selector {
+        padding: 15px;
+    }
+    
+    .session-buttons {
+        flex-direction: column;
+    }
+    
+    .progress-indicator {
+        gap: 6px;
+    }
+    
+    .progress-dot {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+/* Accessibility and Visual Enhancements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus indicators for accessibility */
+button:focus,
+.mystery-btn:focus,
+.btn:focus {
+    outline: 3px solid #4facfe;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn-primary {
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+    
+    .mystery-btn.active {
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 .header {
     text-align: center;
     margin-bottom: 30px;
