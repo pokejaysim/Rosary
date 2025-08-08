@@ -35,18 +35,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Make functions global for onclick handlers
-window.signInWithGoogle = signInWithGoogle;
-window.showEmailLogin = showEmailLogin;
-window.continueAsGuest = continueAsGuest;
-window.signOut = signOut;
-window.continueSession = continueSession;
-window.startFresh = startFresh;
-window.selectMystery = selectMystery;
-window.togglePrayer = togglePrayer;
-window.nextStep = nextStep;
-window.previousStep = previousStep;
-window.resetRosary = resetRosary;
+// Attach UI event handlers after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btnGoogle').addEventListener('click', signInWithGoogle);
+    document.getElementById('btnEmail').addEventListener('click', showEmailLogin);
+    document.getElementById('btnAnonymous').addEventListener('click', continueAsGuest);
+    document.getElementById('btnSignOut').addEventListener('click', signOut);
+    document.querySelector('.btn-restore').addEventListener('click', continueSession);
+    document.querySelector('.btn-fresh').addEventListener('click', startFresh);
+    document.querySelectorAll('.mystery-btn').forEach(btn =>
+        btn.addEventListener('click', () => selectMystery(btn.dataset.mystery))
+    );
+    document.getElementById('prevBtn').addEventListener('click', previousStep);
+    document.getElementById('nextBtn').addEventListener('click', nextStep);
+    document.getElementById('resetBtn').addEventListener('click', resetRosary);
+});
 
 // Current user
 let currentUser = null;

@@ -4,16 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Interactive Rosary Companion - Pray the Holy Rosary with guided mysteries, progress tracking, and daily recommendations.">
-    <meta name="keywords" content="rosary, prayer, catholic, mysteries, holy rosary, spiritual, meditation">
     <meta name="author" content="Rosary Companion">
     <meta property="og:title" content="Rosary Companion - Interactive Prayer Guide">
     <meta property="og:description" content="Pray the Holy Rosary with our interactive companion featuring guided mysteries and progress tracking.">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="images/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://www.google.com">
     <title>Rosary Companion - Interactive Prayer Guide</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+    <a href="#prayerSection" class="skip-link sr-only">Skip to rosary prayer section</a>
     <header class="header">
         <div class="container">
             <h1>Rosary Companion</h1>
@@ -28,14 +31,14 @@
         <section class="auth-section" id="authSection" aria-labelledby="auth-heading">
             <div class="auth-container">
                 <h2 id="auth-heading">Sign in to save your progress</h2>
-                <button class="btn-google" onclick="signInWithGoogle()" aria-label="Sign in with Google account">
-                    <img src="https://www.google.com/favicon.ico" alt="Google logo"> 
+                <button id="btnGoogle" class="btn-google" aria-label="Sign in with Google account">
+                    <img src="https://www.google.com/favicon.ico" alt="">
                     Sign in with Google
                 </button>
-                <button class="btn-email" onclick="showEmailLogin()" aria-label="Sign in with email address">
+                <button id="btnEmail" class="btn-email" aria-label="Sign in with email address">
                     ✉️ Sign in with Email
                 </button>
-                <button class="btn-anonymous" onclick="continueAsGuest()" aria-label="Continue without signing in">
+                <button id="btnAnonymous" class="btn-anonymous" aria-label="Continue without signing in">
                     👤 Continue as Guest
                 </button>
             </div>
@@ -43,7 +46,7 @@
 
         <section class="user-info" id="userInfo" style="display: none;" aria-labelledby="user-greeting">
             <span id="userName" aria-label="Current user"></span>
-            <button class="btn-signout" onclick="signOut()" aria-label="Sign out of account">Sign Out</button>
+            <button id="btnSignOut" class="btn-signout" aria-label="Sign out of account">Sign Out</button>
         </section>
 
         <section class="stats-section" aria-labelledby="stats-heading">
@@ -64,8 +67,8 @@
             <h3>Welcome Back! 🙏</h3>
             <p>You have an unfinished rosary from earlier. Would you like to continue where you left off?</p>
             <div class="session-buttons">
-                <button class="btn-small btn-restore" onclick="continueSession()">Continue</button>
-                <button class="btn-small btn-fresh" onclick="startFresh()">Start Fresh</button>
+                <button class="btn-small btn-restore">Continue</button>
+                <button class="btn-small btn-fresh">Start Fresh</button>
             </div>
         </div>
 
@@ -74,12 +77,11 @@
             <div class="today-mystery" id="todayMystery" role="status" aria-live="polite">
                 Today's Mystery: Joyful Mysteries (Monday)
             </div>
-            <br>
             <div class="mystery-buttons" role="tablist" aria-label="Choose rosary mystery type">
-                <button class="mystery-btn active" data-mystery="joyful" onclick="selectMystery('joyful')" role="tab" aria-selected="true" aria-controls="prayer-content">Joyful</button>
-                <button class="mystery-btn" data-mystery="sorrowful" onclick="selectMystery('sorrowful')" role="tab" aria-selected="false" aria-controls="prayer-content">Sorrowful</button>
-                <button class="mystery-btn" data-mystery="glorious" onclick="selectMystery('glorious')" role="tab" aria-selected="false" aria-controls="prayer-content">Glorious</button>
-                <button class="mystery-btn" data-mystery="luminous" onclick="selectMystery('luminous')" role="tab" aria-selected="false" aria-controls="prayer-content">Luminous</button>
+                <button class="mystery-btn active" data-mystery="joyful" role="tab" aria-selected="true" aria-controls="prayer-content">Joyful</button>
+                <button class="mystery-btn" data-mystery="sorrowful" role="tab" aria-selected="false" aria-controls="prayer-content">Sorrowful</button>
+                <button class="mystery-btn" data-mystery="glorious" role="tab" aria-selected="false" aria-controls="prayer-content">Glorious</button>
+                <button class="mystery-btn" data-mystery="luminous" role="tab" aria-selected="false" aria-controls="prayer-content">Luminous</button>
             </div>
         </section>
 
@@ -111,8 +113,8 @@
             </article>
 
             <div class="controls" role="group" aria-label="Prayer navigation">
-                <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()" aria-label="Go to previous prayer step">Previous</button>
-                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()" aria-label="Continue to next prayer step">Continue</button>
+                <button class="btn btn-secondary" id="prevBtn" aria-label="Go to previous prayer step">Previous</button>
+                <button class="btn btn-primary" id="nextBtn" aria-label="Continue to next prayer step">Continue</button>
             </div>
         </section>
 
@@ -122,7 +124,7 @@
                 <p>May the peace of Christ be with you</p>
             </div>
             <div class="controls">
-                <button class="btn btn-primary" onclick="resetRosary()" aria-label="Begin a new rosary prayer session">Start New Rosary</button>
+                <button id="resetBtn" class="btn btn-primary" aria-label="Begin a new rosary prayer session">Start New Rosary</button>
             </div>
         </section>
     </main>
