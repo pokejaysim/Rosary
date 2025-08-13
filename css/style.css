@@ -73,7 +73,639 @@ h1, h2, h3 {
     font-style: italic;
 }
 
-/* Enhanced Responsive Design */
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+.loading-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.loading-content h2 {
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin: 20px 0 10px 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.loading-content p {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced loading spinner */
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    border-top-color: #fff;
+    margin: 0 auto;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+
+/* Dark Mode Styles */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dark-mode-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-mode-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.dark-mode-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+/* Dark mode variables */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: rgba(255, 255, 255, 0.95);
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --border-color: rgba(255, 255, 255, 0.2);
+    --shadow-color: rgba(0,0,0,0.15);
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: rgba(42, 42, 42, 0.95);
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --shadow-color: rgba(0,0,0,0.3);
+    --gradient-primary: linear-gradient(135deg, #4a69bd 0%, #6c5ce7 100%);
+}
+
+[data-theme="dark"] body {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .auth-section,
+[data-theme="dark"] .stats-section,
+[data-theme="dark"] .mystery-selector,
+[data-theme="dark"] .prayer-section {
+    background: var(--bg-secondary);
+    backdrop-filter: blur(15px);
+    border-color: var(--border-color);
+    box-shadow: 0 8px 32px var(--shadow-color);
+}
+
+[data-theme="dark"] .prayer-content {
+    background: linear-gradient(135deg, rgba(50, 50, 50, 0.9) 0%, rgba(60, 60, 60, 0.8) 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .mystery-info {
+    background: linear-gradient(135deg, rgba(50, 70, 80, 0.9) 0%, rgba(60, 60, 60, 0.8) 100%);
+    border-color: rgba(79, 172, 254, 0.3);
+}
+
+[data-theme="dark"] .btn-google {
+    background: #2d3748;
+    color: #e2e8f0;
+    border-color: #4a5568;
+}
+
+[data-theme="dark"] .btn-anonymous {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .user-info {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .session-restore {
+    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+}
+
+[data-theme="dark"] .dark-mode-toggle {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .dark-mode-icon {
+    transform: rotate(180deg);
+}
+
+/* Audio Controls */
+.audio-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.audio-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.audio-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+.audio-btn:active {
+    transform: translateY(0);
+}
+
+.audio-btn.playing {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    animation: pulse-audio 2s infinite;
+}
+
+.audio-icon {
+    font-size: 1.1rem;
+}
+
+.audio-text {
+    font-family: inherit;
+}
+
+@keyframes pulse-audio {
+    0%, 100% { 
+        box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3); 
+    }
+    50% { 
+        box-shadow: 0 6px 25px rgba(255, 154, 158, 0.6); 
+    }
+}
+
+/* Dark mode audio controls */
+[data-theme="dark"] .audio-btn {
+    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+    box-shadow: 0 4px 15px rgba(41, 128, 185, 0.3);
+}
+
+[data-theme="dark"] .audio-btn:hover {
+    box-shadow: 0 6px 20px rgba(41, 128, 185, 0.4);
+}
+
+[data-theme="dark"] .audio-btn.playing {
+    background: linear-gradient(135deg, #e74c3c 0%, #f39c12 100%);
+    animation: pulse-audio-dark 2s infinite;
+}
+
+@keyframes pulse-audio-dark {
+    0%, 100% { 
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); 
+    }
+    50% { 
+        box-shadow: 0 6px 25px rgba(231, 76, 60, 0.6); 
+    }
+}
+
+/* Error and Success Notifications */
+.error-notification,
+.success-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    backdrop-filter: blur(10px);
+    animation: slideInRight 0.3s ease-out;
+}
+
+.error-notification {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.95) 0%, rgba(192, 57, 43, 0.95) 100%);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.success-notification {
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.95) 0%, rgba(34, 153, 84, 0.95) 100%);
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.error-content,
+.success-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    color: white;
+}
+
+.error-icon,
+.success-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.error-message,
+.success-message {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.error-close,
+.success-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.error-close:hover,
+.success-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Dark mode notifications */
+[data-theme="dark"] .error-notification {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.9) 0%, rgba(192, 57, 43, 0.9) 100%);
+    border-color: rgba(231, 76, 60, 0.4);
+}
+
+[data-theme="dark"] .success-notification {
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.9) 0%, rgba(34, 153, 84, 0.9) 100%);
+    border-color: rgba(39, 174, 96, 0.4);
+}
+
+/* Keyboard Shortcuts Modal */
+.shortcuts-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10001;
+    max-width: 500px;
+    width: 90%;
+    border-radius: 16px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    backdrop-filter: blur(15px);
+    animation: fadeInScale 0.3s ease-out;
+}
+
+.shortcuts-content {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.95) 100%);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    position: relative;
+}
+
+.keyboard-shortcuts h3 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.shortcut-list {
+    display: grid;
+    gap: 12px;
+}
+
+.shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid #667eea;
+}
+
+.shortcut-key {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    min-width: 80px;
+    text-align: center;
+}
+
+.shortcut-desc {
+    color: #4a5568;
+    font-size: 0.9rem;
+    flex: 1;
+    margin-left: 16px;
+}
+
+.shortcuts-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(231, 76, 60, 0.1);
+    border: none;
+    color: #e74c3c;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.shortcuts-close:hover {
+    background: #e74c3c;
+    color: white;
+    transform: scale(1.1);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Dark mode keyboard shortcuts */
+[data-theme="dark"] .shortcuts-content {
+    background: linear-gradient(135deg, rgba(42, 42, 42, 0.95) 0%, rgba(50, 50, 50, 0.95) 100%);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .keyboard-shortcuts h3 {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .shortcut-item {
+    background: rgba(102, 126, 234, 0.1);
+    border-left-color: #4a69bd;
+}
+
+[data-theme="dark"] .shortcut-desc {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .shortcuts-close {
+    background: rgba(231, 76, 60, 0.2);
+    color: #ff6b6b;
+}
+
+[data-theme="dark"] .shortcuts-close:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Bead Counter Visualization */
+.bead-counter {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+    backdrop-filter: blur(5px);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    text-align: center;
+}
+
+.bead-counter-title {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.bead-visualization {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.large-bead {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.small-bead {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+}
+
+.our-father-bead {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.hail-mary-bead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+.glory-be-bead {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+}
+
+.small-beads-container {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.large-bead.active,
+.small-bead.active {
+    border-color: #fff;
+    transform: scale(1.3);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+    z-index: 2;
+}
+
+.large-bead.completed,
+.small-bead.completed {
+    opacity: 0.6;
+    transform: scale(0.9);
+}
+
+.bead-counter-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.bead-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.bead-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.bead-btn-icon {
+    font-size: 1rem;
+}
+
+.bead-btn-text {
+    font-family: inherit;
+}
+
+/* Bead counter responsive design */
+@media (max-width: 480px) {
+    .bead-visualization {
+        gap: 4px;
+    }
+    
+    .small-beads-container {
+        gap: 4px;
+    }
+    
+    .large-bead {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .small-bead {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .bead-counter-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Dark mode bead counter */
+[data-theme="dark"] .bead-counter {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(50, 50, 50, 0.8) 100%);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+[data-theme="dark"] .bead-counter-title {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .our-father-bead {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+[data-theme="dark"] .hail-mary-bead {
+    background: linear-gradient(135deg, #4a69bd 0%, #6c5ce7 100%);
+}
+
+[data-theme="dark"] .glory-be-bead {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+[data-theme="dark"] .bead-btn {
+    background: linear-gradient(135deg, #4a69bd 0%, #6c5ce7 100%);
+}
+
+/* Enhanced Visual Design */
 @media (max-width: 768px) {
     .container {
         padding: 15px;

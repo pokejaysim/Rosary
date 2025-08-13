@@ -14,19 +14,39 @@
     <title>Rosary Companion - Interactive Prayer Guide</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#764ba2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Rosary Companion">
+    <link rel="apple-touch-icon" href="images/rosary-optimized.svg">
 </head>
 <body>
     <a href="#prayerSection" class="skip-link sr-only">Skip to rosary prayer section</a>
     <header class="header">
         <div class="container">
-            <h1>Rosary Companion</h1>
+            <div class="header-top">
+                <h1>Rosary Companion</h1>
+                <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
+                    <span class="dark-mode-icon">🌙</span>
+                </button>
+            </div>
             <nav aria-label="Prayer progress navigation" class="sr-only">
                 <!-- Navigation will be handled by the step indicator -->
             </nav>
         </div>
     </header>
     
-    <main class="container">
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading Rosary Companion...</h2>
+            <p>Preparing your prayer experience</p>
+        </div>
+    </div>
+
+    <main class="container" id="mainContainer" style="display: none;">
 
         <section class="auth-section" id="authSection" aria-labelledby="auth-heading">
             <div class="auth-container">
@@ -101,12 +121,53 @@
             <div class="current-step">
                 <h2 class="step-title" id="stepTitle">Opening Prayers</h2>
                 <p class="step-subtitle" id="stepSubtitle">Begin with the Sign of the Cross</p>
+                <div class="audio-controls">
+                    <button id="playAudioBtn" class="audio-btn" aria-label="Play prayer audio">
+                        <span class="audio-icon">🔊</span>
+                        <span class="audio-text">Listen</span>
+                    </button>
+                    <button id="pauseAudioBtn" class="audio-btn" style="display: none;" aria-label="Pause prayer audio">
+                        <span class="audio-icon">⏸️</span>
+                        <span class="audio-text">Pause</span>
+                    </button>
+                </div>
             </div>
 
             <aside id="mysteryInfo" class="mystery-info" style="display: none;" aria-labelledby="current-mystery">
                 <h3 class="mystery-name" id="currentMysteryName"></h3>
                 <p class="mystery-virtue" id="currentMysteryVirtue"></p>
             </aside>
+
+            <!-- Bead Counter for decades -->
+            <div class="bead-counter" id="beadCounter" style="display: none;">
+                <h4 class="bead-counter-title">Prayer Beads</h4>
+                <div class="bead-visualization">
+                    <div class="large-bead our-father-bead" aria-label="Our Father bead"></div>
+                    <div class="small-beads-container">
+                        <div class="small-bead hail-mary-bead" data-bead="1" aria-label="Hail Mary 1"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="2" aria-label="Hail Mary 2"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="3" aria-label="Hail Mary 3"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="4" aria-label="Hail Mary 4"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="5" aria-label="Hail Mary 5"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="6" aria-label="Hail Mary 6"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="7" aria-label="Hail Mary 7"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="8" aria-label="Hail Mary 8"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="9" aria-label="Hail Mary 9"></div>
+                        <div class="small-bead hail-mary-bead" data-bead="10" aria-label="Hail Mary 10"></div>
+                    </div>
+                    <div class="large-bead glory-be-bead" aria-label="Glory Be bead"></div>
+                </div>
+                <div class="bead-counter-controls">
+                    <button id="advanceBeadBtn" class="bead-btn" aria-label="Advance to next bead">
+                        <span class="bead-btn-icon">→</span>
+                        <span class="bead-btn-text">Next Prayer</span>
+                    </button>
+                    <button id="resetBeadBtn" class="bead-btn" aria-label="Reset bead counter">
+                        <span class="bead-btn-icon">↺</span>
+                        <span class="bead-btn-text">Reset</span>
+                    </button>
+                </div>
+            </div>
 
             <article class="prayer-content" id="prayerContent" role="tabpanel" aria-labelledby="stepTitle">
                 <!-- Content will be dynamically updated -->

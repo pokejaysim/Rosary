@@ -19,16 +19,10 @@ import {
     increment,
     deleteField
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import config from './config.js';
 
-// Your Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDUpyuXLST_okNuDawiN3HTB2gvNmAa_u0",
-    authDomain: "rosary-companion-5fbb7.firebaseapp.com",
-    projectId: "rosary-companion-5fbb7",
-    storageBucket: "rosary-companion-5fbb7.firebasestorage.app",
-    messagingSenderId: "389748583800",
-    appId: "1:389748583800:web:2f7c2973adf0b30af92c8d"
-};
+// Firebase configuration from environment variables
+const firebaseConfig = config.firebase;
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -49,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('prevBtn').addEventListener('click', previousStep);
     document.getElementById('nextBtn').addEventListener('click', nextStep);
     document.getElementById('resetBtn').addEventListener('click', resetRosary);
+    document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+    document.getElementById('playAudioBtn').addEventListener('click', playPrayerAudio);
+    document.getElementById('pauseAudioBtn').addEventListener('click', pausePrayerAudio);
+    document.getElementById('advanceBeadBtn').addEventListener('click', advanceBead);
+    document.getElementById('resetBeadBtn').addEventListener('click', resetBeadCounter);
 });
 
 // Current user
@@ -91,6 +90,7 @@ let currentMystery = 'joyful';
 let currentDecade = 0;
 let completedRosaries = 0;
 let currentStreak = 0;
+let currentBeadPosition = 0; // 0 = Our Father, 1-10 = Hail Marys, 11 = Glory Be
 let sessionData = {
     currentStep: 0,
     currentMystery: 'joyful',
@@ -122,23 +122,40 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('userName').textContent = 
             user.displayName || user.email || 'Guest User';
         
+        // Show loading state for user data
+        showLoadingState(document.getElementById('statsDisplay'), 'Loading your statistics...');
+        
         // Load user data from Firestore
-        loadUserData();
+        loadUserData().then(() => {
+            // Hide loading overlay once everything is loaded
+            hideLoadingOverlay();
+        }).catch(() => {
+            // Still hide overlay even if loading fails
+            hideLoadingOverlay();
+        });
     } else {
         // User is signed out
         document.getElementById('authSection').style.display = 'block';
         document.getElementById('userInfo').style.display = 'none';
+        // Hide loading overlay for non-authenticated users
+        hideLoadingOverlay();
     }
 });
 
 // Sign in with Google
 async function signInWithGoogle() {
     try {
+        showLoadingState(document.getElementById('btnGoogle'), 'Signing in...');
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
     } catch (error) {
         console.error('Error signing in with Google:', error);
-        alert('Failed to sign in. Please try again.');
+        handleAuthError(error);
+        // Reset button state
+        document.getElementById('btnGoogle').innerHTML = `
+            <img src="https://www.google.com/favicon.ico" alt="">
+            Sign in with Google
+        `;
     }
 }
 
@@ -150,9 +167,15 @@ function showEmailLogin() {
 // Continue as guest (anonymous auth)
 async function continueAsGuest() {
     try {
+        showLoadingState(document.getElementById('btnAnonymous'), 'Signing in...');
         await signInAnonymously(auth);
     } catch (error) {
         console.error('Error with anonymous auth:', error);
+        handleAuthError(error);
+        // Reset button state
+        document.getElementById('btnAnonymous').innerHTML = `
+            👤 Continue as Guest
+        `;
     }
 }
 
@@ -171,7 +194,7 @@ async function signOut() {
 
 // Load user data from Firestore
 async function loadUserData() {
-    if (!currentUser) return;
+    if (!currentUser) return Promise.resolve();
     
     try {
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
@@ -218,8 +241,11 @@ async function loadUserData() {
                 }
             });
         }
+        return Promise.resolve();
     } catch (error) {
         console.error('Error loading user data:', error);
+        handleFirestoreError(error, 'load your data');
+        return Promise.reject(error);
     }
 }
 
@@ -251,6 +277,7 @@ async function saveProgress() {
         console.log('Progress saved:', sessionUpdate);
     } catch (error) {
         console.error('Error saving progress:', error);
+        handleFirestoreError(error, 'save your progress');
     }
 }
 
@@ -298,8 +325,10 @@ async function completeRosary() {
             
             // Update global statistics
             updateGlobalStats();
+            showSuccessNotification('Rosary completed and saved! 🙏');
         } catch (error) {
             console.error('Error saving completion:', error);
+            handleFirestoreError(error, 'save your completed rosary');
         }
     }
 }
@@ -325,7 +354,580 @@ async function updateGlobalStats() {
 document.addEventListener('DOMContentLoaded', function() {
     updateTodaysMystery();
     updateUI();
+    
+    // Initialize dark mode
+    initializeDarkMode();
+    
+    // Initialize keyboard navigation
+    initializeKeyboardNavigation();
+    
+    // Register service worker for PWA functionality
+    registerServiceWorker();
+    
+    // Hide loading overlay after Firebase is initialized and DOM is ready
+    setTimeout(() => {
+        hideLoadingOverlay();
+    }, 1500); // Minimum loading time for better UX
 });
+
+// Dark mode functionality
+function initializeDarkMode() {
+    const savedTheme = localStorage.getItem('theme') || 
+                     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateDarkModeIcon(savedTheme);
+}
+
+function toggleDarkMode() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateDarkModeIcon(newTheme);
+}
+
+function updateDarkModeIcon(theme) {
+    const icon = document.querySelector('.dark-mode-icon');
+    if (icon) {
+        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+}
+
+// Text-to-Speech functionality
+let speechSynthesis = window.speechSynthesis;
+let currentUtterance = null;
+let isPlaying = false;
+
+function playPrayerAudio() {
+    if (!speechSynthesis) {
+        alert('Text-to-speech is not supported in your browser.');
+        return;
+    }
+
+    const prayerContent = getCurrentPrayerText();
+    if (!prayerContent) return;
+
+    // Stop any current speech
+    if (isPlaying) {
+        speechSynthesis.cancel();
+    }
+
+    currentUtterance = new SpeechSynthesisUtterance(prayerContent);
+    
+    // Configure speech settings
+    currentUtterance.rate = 0.8; // Slower, more reverent pace
+    currentUtterance.pitch = 1;
+    currentUtterance.volume = 0.9;
+    
+    // Try to use a more suitable voice
+    const voices = speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => 
+        voice.lang.includes('en') && 
+        (voice.name.includes('Female') || voice.name.includes('natural'))
+    ) || voices.find(voice => voice.lang.includes('en'));
+    
+    if (preferredVoice) {
+        currentUtterance.voice = preferredVoice;
+    }
+
+    // Set up event listeners
+    currentUtterance.onstart = () => {
+        isPlaying = true;
+        updateAudioButtons(true);
+    };
+
+    currentUtterance.onend = () => {
+        isPlaying = false;
+        updateAudioButtons(false);
+    };
+
+    currentUtterance.onerror = () => {
+        isPlaying = false;
+        updateAudioButtons(false);
+        console.error('Speech synthesis error');
+    };
+
+    speechSynthesis.speak(currentUtterance);
+}
+
+function pausePrayerAudio() {
+    if (speechSynthesis && isPlaying) {
+        speechSynthesis.cancel();
+        isPlaying = false;
+        updateAudioButtons(false);
+    }
+}
+
+function updateAudioButtons(playing) {
+    const playBtn = document.getElementById('playAudioBtn');
+    const pauseBtn = document.getElementById('pauseAudioBtn');
+    
+    if (playing) {
+        playBtn.style.display = 'none';
+        pauseBtn.style.display = 'flex';
+        pauseBtn.classList.add('playing');
+    } else {
+        playBtn.style.display = 'flex';
+        pauseBtn.style.display = 'none';
+        pauseBtn.classList.remove('playing');
+    }
+}
+
+function getCurrentPrayerText() {
+    const stepTitle = document.getElementById('stepTitle').textContent;
+    const stepSubtitle = document.getElementById('stepSubtitle').textContent;
+    let text = `${stepTitle}. ${stepSubtitle}. `;
+
+    // Add mystery information if visible
+    const mysteryInfo = document.getElementById('mysteryInfo');
+    if (mysteryInfo && mysteryInfo.style.display !== 'none') {
+        const mysteryName = document.getElementById('currentMysteryName').textContent;
+        const mysteryVirtue = document.getElementById('currentMysteryVirtue').textContent;
+        text += `${mysteryName}. ${mysteryVirtue}. `;
+    }
+
+    // Get prayer content and extract text
+    const prayerContent = document.getElementById('prayerContent');
+    if (prayerContent) {
+        // Get all prayer text elements
+        const prayerTexts = prayerContent.querySelectorAll('.prayer-text');
+        prayerTexts.forEach(prayerText => {
+            // Clean up the text (remove HTML tags and normalize whitespace)
+            let cleanText = prayerText.innerHTML
+                .replace(/<br\s*\/?>/gi, '. ')
+                .replace(/<[^>]*>/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            if (cleanText) {
+                text += cleanText + '. ';
+            }
+        });
+
+        // Also check for regular prayer text paragraphs
+        const regularPrayerTexts = prayerContent.querySelectorAll('p.prayer-text');
+        regularPrayerTexts.forEach(p => {
+            const cleanText = p.textContent.trim();
+            if (cleanText) {
+                text += cleanText + '. ';
+            }
+        });
+    }
+
+    return text.trim();
+}
+
+// Error handling functions
+function handleAuthError(error) {
+    let message = 'Authentication failed. Please try again.';
+    
+    switch (error.code) {
+        case 'auth/popup-closed-by-user':
+            message = 'Sign-in was cancelled. Please try again.';
+            break;
+        case 'auth/popup-blocked':
+            message = 'Pop-up was blocked. Please allow pop-ups for this site.';
+            break;
+        case 'auth/network-request-failed':
+            message = 'Network error. Please check your connection and try again.';
+            break;
+        case 'auth/too-many-requests':
+            message = 'Too many sign-in attempts. Please wait a moment and try again.';
+            break;
+        case 'auth/quota-exceeded':
+            message = 'Service temporarily unavailable. Please try again later.';
+            break;
+        default:
+            console.error('Auth error details:', error);
+    }
+    
+    showErrorNotification(message);
+}
+
+function handleFirestoreError(error, operation = 'operation') {
+    let message = `Failed to ${operation}. Please try again.`;
+    
+    switch (error.code) {
+        case 'permission-denied':
+            message = 'Permission denied. Please sign in and try again.';
+            break;
+        case 'unavailable':
+            message = 'Service temporarily unavailable. Your data will be saved when connection is restored.';
+            break;
+        case 'deadline-exceeded':
+            message = 'Request timed out. Please check your connection.';
+            break;
+        case 'resource-exhausted':
+            message = 'Service limits exceeded. Please try again later.';
+            break;
+        default:
+            console.error(`Firestore error during ${operation}:`, error);
+    }
+    
+    showErrorNotification(message);
+}
+
+function showErrorNotification(message) {
+    // Create and show error notification
+    const notification = document.createElement('div');
+    notification.className = 'error-notification';
+    notification.innerHTML = `
+        <div class="error-content">
+            <span class="error-icon">⚠️</span>
+            <span class="error-message">${message}</span>
+            <button class="error-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function showSuccessNotification(message) {
+    // Create and show success notification
+    const notification = document.createElement('div');
+    notification.className = 'success-notification';
+    notification.innerHTML = `
+        <div class="success-content">
+            <span class="success-icon">✅</span>
+            <span class="success-message">${message}</span>
+            <button class="success-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Global error handler
+window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
+    showErrorNotification('An unexpected error occurred. Please refresh the page if problems persist.');
+});
+
+// Handle unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    showErrorNotification('A network error occurred. Please check your connection.');
+    event.preventDefault();
+});
+
+// Keyboard navigation functionality
+function initializeKeyboardNavigation() {
+    document.addEventListener('keydown', handleKeyboardNavigation);
+}
+
+function handleKeyboardNavigation(event) {
+    // Don't interfere with typing in inputs
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+    }
+
+    switch (event.key) {
+        case 'ArrowRight':
+        case ' ': // Spacebar
+            event.preventDefault();
+            if (currentStep < 6 && document.getElementById('prayerSection').style.display !== 'none') {
+                nextStep();
+            }
+            break;
+            
+        case 'ArrowLeft':
+            event.preventDefault();
+            if (currentStep > 0 && document.getElementById('prayerSection').style.display !== 'none') {
+                previousStep();
+            }
+            break;
+            
+        case 'r':
+        case 'R':
+            if (event.ctrlKey || event.metaKey) {
+                break; // Allow page refresh
+            }
+            event.preventDefault();
+            if (document.getElementById('completionMessage').style.display !== 'none') {
+                resetRosary();
+            }
+            break;
+            
+        case 'p':
+        case 'P':
+            event.preventDefault();
+            if (document.getElementById('playAudioBtn').style.display !== 'none') {
+                playPrayerAudio();
+            } else if (document.getElementById('pauseAudioBtn').style.display !== 'none') {
+                pausePrayerAudio();
+            }
+            break;
+            
+        case 'd':
+        case 'D':
+            event.preventDefault();
+            toggleDarkMode();
+            break;
+            
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+            event.preventDefault();
+            const mysteryIndex = parseInt(event.key) - 1;
+            const mysteries = ['joyful', 'sorrowful', 'glorious', 'luminous'];
+            if (mysteries[mysteryIndex]) {
+                selectMystery(mysteries[mysteryIndex]);
+            }
+            break;
+            
+        case 'Escape':
+            event.preventDefault();
+            // Close any open notifications
+            const notifications = document.querySelectorAll('.error-notification, .success-notification');
+            notifications.forEach(notification => notification.remove());
+            break;
+            
+        case '?':
+        case '/':
+            event.preventDefault();
+            showKeyboardShortcuts();
+            break;
+    }
+}
+
+function showKeyboardShortcuts() {
+    const shortcuts = `
+        <div class="keyboard-shortcuts">
+            <h3>Keyboard Shortcuts</h3>
+            <div class="shortcut-list">
+                <div class="shortcut-item">
+                    <span class="shortcut-key">→ / Space</span>
+                    <span class="shortcut-desc">Next step</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">←</span>
+                    <span class="shortcut-desc">Previous step</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">P</span>
+                    <span class="shortcut-desc">Play/Pause audio</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">D</span>
+                    <span class="shortcut-desc">Toggle dark mode</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">1-4</span>
+                    <span class="shortcut-desc">Select mystery (Joyful, Sorrowful, Glorious, Luminous)</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">R</span>
+                    <span class="shortcut-desc">Reset/Start new rosary</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Esc</span>
+                    <span class="shortcut-desc">Close notifications</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">?</span>
+                    <span class="shortcut-desc">Show this help</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const notification = document.createElement('div');
+    notification.className = 'shortcuts-notification';
+    notification.innerHTML = `
+        <div class="shortcuts-content">
+            ${shortcuts}
+            <button class="shortcuts-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 10000);
+}
+
+// Bead Counter functionality
+function updateBeadCounter() {
+    const beadCounter = document.getElementById('beadCounter');
+    
+    // Show bead counter only during decades
+    if (currentStep >= 1 && currentStep <= 5) {
+        beadCounter.style.display = 'block';
+        updateBeadVisualization();
+    } else {
+        beadCounter.style.display = 'none';
+        currentBeadPosition = 0;
+    }
+}
+
+function updateBeadVisualization() {
+    // Reset all beads
+    document.querySelectorAll('.large-bead, .small-bead').forEach(bead => {
+        bead.classList.remove('active', 'completed');
+    });
+    
+    // Mark completed beads
+    if (currentBeadPosition > 0) {
+        document.querySelector('.our-father-bead').classList.add('completed');
+    }
+    
+    for (let i = 1; i <= Math.min(currentBeadPosition - 1, 10); i++) {
+        const bead = document.querySelector(`[data-bead="${i}"]`);
+        if (bead) bead.classList.add('completed');
+    }
+    
+    if (currentBeadPosition > 10) {
+        document.querySelector('.glory-be-bead').classList.add('completed');
+    }
+    
+    // Mark current active bead
+    if (currentBeadPosition === 0) {
+        document.querySelector('.our-father-bead').classList.add('active');
+    } else if (currentBeadPosition >= 1 && currentBeadPosition <= 10) {
+        const currentBead = document.querySelector(`[data-bead="${currentBeadPosition}"]`);
+        if (currentBead) currentBead.classList.add('active');
+    } else if (currentBeadPosition === 11) {
+        document.querySelector('.glory-be-bead').classList.add('active');
+    }
+}
+
+function advanceBead() {
+    if (currentStep >= 1 && currentStep <= 5) {
+        currentBeadPosition++;
+        
+        if (currentBeadPosition > 11) {
+            // Completed the decade, advance to next step
+            currentBeadPosition = 0;
+            nextStep();
+        } else {
+            updateBeadVisualization();
+            updateBeadCounterStatus();
+        }
+    }
+}
+
+function resetBeadCounter() {
+    currentBeadPosition = 0;
+    updateBeadVisualization();
+    updateBeadCounterStatus();
+}
+
+function updateBeadCounterStatus() {
+    const advanceBtn = document.getElementById('advanceBeadBtn');
+    const resetBtn = document.getElementById('resetBeadBtn');
+    
+    if (currentBeadPosition === 0) {
+        advanceBtn.innerHTML = '<span class="bead-btn-icon">→</span><span class="bead-btn-text">Our Father</span>';
+    } else if (currentBeadPosition >= 1 && currentBeadPosition <= 10) {
+        advanceBtn.innerHTML = `<span class="bead-btn-icon">→</span><span class="bead-btn-text">Hail Mary ${currentBeadPosition + 1}</span>`;
+    } else if (currentBeadPosition === 11) {
+        advanceBtn.innerHTML = '<span class="bead-btn-icon">→</span><span class="bead-btn-text">Glory Be</span>';
+    }
+    
+    resetBtn.style.display = currentBeadPosition > 0 ? 'flex' : 'none';
+}
+
+// Add click handlers for individual beads
+document.addEventListener('DOMContentLoaded', () => {
+    // Add click handlers for Hail Mary beads
+    document.querySelectorAll('.hail-mary-bead').forEach((bead, index) => {
+        bead.addEventListener('click', () => {
+            if (currentStep >= 1 && currentStep <= 5) {
+                currentBeadPosition = index + 1;
+                updateBeadVisualization();
+                updateBeadCounterStatus();
+            }
+        });
+    });
+    
+    // Add click handler for Our Father bead
+    document.querySelector('.our-father-bead')?.addEventListener('click', () => {
+        if (currentStep >= 1 && currentStep <= 5) {
+            currentBeadPosition = 0;
+            updateBeadVisualization();
+            updateBeadCounterStatus();
+        }
+    });
+    
+    // Add click handler for Glory Be bead
+    document.querySelector('.glory-be-bead')?.addEventListener('click', () => {
+        if (currentStep >= 1 && currentStep <= 5) {
+            currentBeadPosition = 11;
+            updateBeadVisualization();
+            updateBeadCounterStatus();
+        }
+    });
+});
+
+// Register service worker
+async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log('ServiceWorker registered successfully');
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // New version available, show update notification
+                        showUpdateNotification();
+                    }
+                });
+            });
+        } catch (error) {
+            console.log('ServiceWorker registration failed:', error);
+        }
+    }
+}
+
+// Show update notification
+function showUpdateNotification() {
+    // You could show a toast notification here
+    console.log('New version available! Refresh to update.');
+}
+
+// Loading state management
+function hideLoadingOverlay() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const mainContainer = document.getElementById('mainContainer');
+    
+    loadingOverlay.classList.add('fade-out');
+    mainContainer.style.display = 'block';
+    
+    // Remove overlay from DOM after transition
+    setTimeout(() => {
+        loadingOverlay.style.display = 'none';
+    }, 500);
+}
+
+function showLoadingState(element, text = 'Loading...') {
+    if (element) {
+        element.innerHTML = `<div class="loading-spinner"></div><p>${text}</p>`;
+    }
+}
 
 // Continue session
 function continueSession() {
@@ -644,6 +1246,12 @@ function updateUI() {
     document.getElementById('prevBtn').style.display = currentStep === 0 ? 'none' : 'block';
     document.getElementById('nextBtn').textContent = currentStep === 6 ? 'Complete' : 'Continue';
     
+    // Update bead counter
+    updateBeadCounter();
+    if (currentStep >= 1 && currentStep <= 5) {
+        updateBeadCounterStatus();
+    }
+    
     saveProgress();
 }
 
@@ -651,6 +1259,12 @@ function updateUI() {
 function nextStep() {
     if (currentStep < 7) {
         currentStep++;
+        
+        // Reset bead position when entering a new decade
+        if (currentStep >= 1 && currentStep <= 5) {
+            currentBeadPosition = 0;
+        }
+        
         updateUI();
         
         if (currentStep === 7) {
@@ -663,6 +1277,12 @@ function nextStep() {
 function previousStep() {
     if (currentStep > 0) {
         currentStep--;
+        
+        // Reset bead position when entering a decade
+        if (currentStep >= 1 && currentStep <= 5) {
+            currentBeadPosition = 0;
+        }
+        
         updateUI();
     }
 }
@@ -671,6 +1291,7 @@ function previousStep() {
 function resetRosary() {
     currentStep = 0;
     currentDecade = 0;
+    currentBeadPosition = 0;
     document.getElementById('prayerSection').style.display = 'block';
     document.getElementById('completionMessage').style.display = 'none';
     document.getElementById('mysterySelector').style.display = 'block';
