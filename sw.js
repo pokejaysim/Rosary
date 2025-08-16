@@ -1,13 +1,14 @@
 const CACHE_NAME = 'rosary-companion-v1.0.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/script.js',
-  '/images/rosary-optimized.svg',
-  '/images/rosary.svg',
-  '/favicon.ico',
-  '/manifest.json',
+  './',
+  './index.html',
+  './css/style.css',
+  './js/script.js',
+  './js/config.js',
+  './images/rosary-optimized.svg',
+  './images/rosary.svg',
+  './favicon.ico',
+  './manifest.json',
   // Firebase CDN resources
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js',
