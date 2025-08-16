@@ -116,7 +116,9 @@ const steps = [
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
     if (user) {
-        // User is signed in
+        // User is signed in - show main container first
+        hideLoadingOverlay();
+        
         document.getElementById('authSection').style.display = 'none';
         document.getElementById('userInfo').style.display = 'flex';
         document.getElementById('userName').textContent = 
@@ -126,12 +128,8 @@ onAuthStateChanged(auth, (user) => {
         showLoadingState(document.getElementById('statsDisplay'), 'Loading your statistics...');
         
         // Load user data from Firestore
-        loadUserData().then(() => {
-            // Hide loading overlay once everything is loaded
-            hideLoadingOverlay();
-        }).catch(() => {
-            // Still hide overlay even if loading fails
-            hideLoadingOverlay();
+        loadUserData().catch(() => {
+            console.error('Failed to load user data, but continuing...');
         });
     } else {
         // User is signed out
@@ -884,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
+            const registration = await navigator.serviceWorker.register('./sw.js');
             console.log('ServiceWorker registered successfully');
             
             // Check for updates
@@ -924,7 +922,7 @@ function hideLoadingOverlay() {
 }
 
 function showLoadingState(element, text = 'Loading...') {
-    if (element) {
+    if (element && element.innerHTML !== undefined) {
         element.innerHTML = `<div class="loading-spinner"></div><p>${text}</p>`;
     }
 }
@@ -955,8 +953,15 @@ function startFresh() {
 
 // Update stats display
 function updateStats() {
-    document.getElementById('totalRosaries').textContent = completedRosaries;
-    document.getElementById('dayStreak').textContent = currentStreak;
+    const totalRosariesEl = document.getElementById('totalRosaries');
+    const dayStreakEl = document.getElementById('dayStreak');
+    
+    if (totalRosariesEl) {
+        totalRosariesEl.textContent = completedRosaries;
+    }
+    if (dayStreakEl) {
+        dayStreakEl.textContent = currentStreak;
+    }
 }
 
 // Update today's mystery
