@@ -1007,6 +1007,9 @@ function togglePrayer(prayerId) {
     icon.classList.toggle('expanded');
 }
 
+// Make togglePrayer available globally for onclick handlers
+window.togglePrayer = togglePrayer;
+
 // Update UI
 function updateUI() {
     // Update progress dots and progress bar
