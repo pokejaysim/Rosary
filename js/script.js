@@ -29,7 +29,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Toggle prayer visibility function (must be defined early for onclick handlers)
+// Toggle prayer visibility function
 function togglePrayer(prayerId) {
     const prayerText = document.getElementById(prayerId);
     const icon = document.getElementById(prayerId + 'Icon');
@@ -37,9 +37,6 @@ function togglePrayer(prayerId) {
     prayerText.classList.toggle('expanded');
     icon.classList.toggle('expanded');
 }
-
-// Make togglePrayer available globally for onclick handlers
-window.togglePrayer = togglePrayer;
 
 // Attach UI event handlers after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -60,6 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('pauseAudioBtn').addEventListener('click', pausePrayerAudio);
     document.getElementById('advanceBeadBtn').addEventListener('click', advanceBead);
     document.getElementById('resetBeadBtn').addEventListener('click', resetBeadCounter);
+    
+    // Event delegation for prayer headers (dynamically created content)
+    document.addEventListener('click', (event) => {
+        const prayerHeader = event.target.closest('.prayer-header[data-prayer-id]');
+        if (prayerHeader) {
+            const prayerId = prayerHeader.dataset.prayerId;
+            togglePrayer(prayerId);
+        }
+    });
 });
 
 // Current user
@@ -1056,7 +1062,7 @@ function updateUI() {
             mysteryInfo.style.display = 'none';
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('apostlesCreed')">
+                    <div class="prayer-header" data-prayer-id="apostlesCreed">
                         <span class="prayer-title">The Apostles' Creed</span>
                         <span class="expand-icon" id="apostlesCreedIcon">▼</span>
                     </div>
@@ -1085,7 +1091,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('ourFather')">
+                    <div class="prayer-header" data-prayer-id="ourFather">
                         <span class="prayer-title">Our Father</span>
                         <span class="expand-icon" id="ourFatherIcon">▼</span>
                     </div>
@@ -1125,7 +1131,7 @@ function updateUI() {
             
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('ourFatherDecade')">
+                    <div class="prayer-header" data-prayer-id="ourFatherDecade">
                         <span class="prayer-title">Our Father</span>
                         <span class="expand-icon" id="ourFatherDecadeIcon">▼</span>
                     </div>
@@ -1146,7 +1152,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('hailMary')">
+                    <div class="prayer-header" data-prayer-id="hailMary">
                         <span class="prayer-title">Hail Mary (10 times)</span>
                         <span class="expand-icon" id="hailMaryIcon">▼</span>
                     </div>
@@ -1164,7 +1170,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('gloryBe')">
+                    <div class="prayer-header" data-prayer-id="gloryBe">
                         <span class="prayer-title">Glory Be</span>
                         <span class="expand-icon" id="gloryBeIcon">▼</span>
                     </div>
@@ -1181,7 +1187,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('fatimaPrayer')">
+                    <div class="prayer-header" data-prayer-id="fatimaPrayer">
                         <span class="prayer-title">Fatima Prayer</span>
                         <span class="expand-icon" id="fatimaPrayerIcon">▼</span>
                     </div>
@@ -1203,7 +1209,7 @@ function updateUI() {
             mysteryInfo.style.display = 'none';
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('hailHolyQueen')">
+                    <div class="prayer-header" data-prayer-id="hailHolyQueen">
                         <span class="prayer-title">Hail Holy Queen</span>
                         <span class="expand-icon" id="hailHolyQueenIcon">▼</span>
                     </div>
@@ -1226,7 +1232,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" onclick="togglePrayer('finalPrayer')">
+                    <div class="prayer-header" data-prayer-id="finalPrayer">
                         <span class="prayer-title">Final Prayer</span>
                         <span class="expand-icon" id="finalPrayerIcon">▼</span>
                     </div>
