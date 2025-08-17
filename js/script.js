@@ -29,6 +29,18 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Toggle prayer visibility function (must be defined early for onclick handlers)
+function togglePrayer(prayerId) {
+    const prayerText = document.getElementById(prayerId);
+    const icon = document.getElementById(prayerId + 'Icon');
+    
+    prayerText.classList.toggle('expanded');
+    icon.classList.toggle('expanded');
+}
+
+// Make togglePrayer available globally for onclick handlers
+window.togglePrayer = togglePrayer;
+
 // Attach UI event handlers after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnGoogle').addEventListener('click', signInWithGoogle);
@@ -998,17 +1010,6 @@ function selectMystery(mystery) {
     saveProgress();
 }
 
-// Toggle prayer visibility
-function togglePrayer(prayerId) {
-    const prayerText = document.getElementById(prayerId);
-    const icon = document.getElementById(prayerId + 'Icon');
-    
-    prayerText.classList.toggle('expanded');
-    icon.classList.toggle('expanded');
-}
-
-// Make togglePrayer available globally for onclick handlers
-window.togglePrayer = togglePrayer;
 
 // Update UI
 function updateUI() {
