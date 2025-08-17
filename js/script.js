@@ -1233,9 +1233,6 @@ function updateUI() {
 
                 <div class="expandable-prayer">
                     <div class="prayer-header" data-prayer-id="finalPrayer">
-                        <span class="prayer-title">Final Prayer</span>
-                        <span class="expand-icon" id="finalPrayerIcon">▼</span>
-                    </div>
                     <div class="prayer-full-text" id="finalPrayer">
                         <div class="prayer-text">
                             Let us pray.<br>
