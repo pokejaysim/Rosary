@@ -29,13 +29,30 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Toggle prayer visibility function
+// Accessible toggle for any prayer section
 function togglePrayer(prayerId) {
-    const prayerText = document.getElementById(prayerId);
-    const icon = document.getElementById(prayerId + 'Icon');
-    
-    prayerText.classList.toggle('expanded');
-    icon.classList.toggle('expanded');
+    // Find the section via the header
+    const header = document.querySelector(
+        `.prayer-header[data-prayer-id="${CSS.escape(prayerId)}"]`
+    );
+    if (!header) return;
+
+    const section = header.closest('.expandable-prayer');
+    const panel = section?.querySelector(`#${CSS.escape(prayerId)}`);
+    const icon = section?.querySelector(`#${CSS.escape(prayerId)}Icon`);
+
+    const expanded = header.getAttribute('aria-expanded') === 'true';
+    const next = !expanded;
+
+    header.setAttribute('aria-expanded', String(next));
+
+    if (panel) {
+        panel.hidden = !next;
+        panel.classList.toggle('expanded', next); // keep existing CSS happy
+    }
+    if (icon) {
+        icon.classList.toggle('expanded', next);
+    }
 }
 
 // Attach UI event handlers after DOM is ready
@@ -64,6 +81,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (prayerHeader) {
             const prayerId = prayerHeader.dataset.prayerId;
             togglePrayer(prayerId);
+        }
+    });
+
+    // Keyboard support (Enter/Space toggles)
+    document.addEventListener('keydown', (event) => {
+        const header = event.target.closest('.prayer-header[data-prayer-id]');
+        if (!header) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            togglePrayer(header.dataset.prayerId);
         }
     });
 });
@@ -1062,11 +1089,11 @@ function updateUI() {
             mysteryInfo.style.display = 'none';
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="apostlesCreed">
+                    <div class="prayer-header" data-prayer-id="apostlesCreed" role="button" tabindex="0" aria-expanded="false">
                         <span class="prayer-title">The Apostles' Creed</span>
                         <span class="expand-icon" id="apostlesCreedIcon">▼</span>
                     </div>
-                    <div class="prayer-full-text" id="apostlesCreed">
+                    <div class="prayer-full-text" id="apostlesCreed" hidden>
                         <div class="prayer-text">
                             I believe in God, the Father Almighty,<br>
                             Creator of heaven and earth;<br>
@@ -1091,11 +1118,11 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="ourFather">
+                    <div class="prayer-header" data-prayer-id="ourFather" role="button" tabindex="0" aria-expanded="false">
                         <span class="prayer-title">Our Father</span>
                         <span class="expand-icon" id="ourFatherIcon">▼</span>
                     </div>
-                    <div class="prayer-full-text" id="ourFather">
+                    <div class="prayer-full-text" id="ourFather" hidden>
                         <div class="prayer-text">
                             Our Father, who art in heaven,<br>
                             hallowed be thy name;<br>
@@ -1131,11 +1158,11 @@ function updateUI() {
             
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="ourFatherDecade">
+                    <div class="prayer-header" data-prayer-id="ourFatherDecade" role="button" tabindex="0" aria-expanded="false">
                         <span class="prayer-title">Our Father</span>
                         <span class="expand-icon" id="ourFatherDecadeIcon">▼</span>
                     </div>
-                    <div class="prayer-full-text" id="ourFatherDecade">
+                    <div class="prayer-full-text" id="ourFatherDecade" hidden>
                         <div class="prayer-text">
                             Our Father, who art in heaven,<br>
                             hallowed be thy name;<br>
@@ -1152,11 +1179,11 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="hailMary">
+                    <div class="prayer-header" data-prayer-id="hailMary" role="button" tabindex="0" aria-expanded="false">
                         <span class="prayer-title">Hail Mary (10 times)</span>
                         <span class="expand-icon" id="hailMaryIcon">▼</span>
                     </div>
-                    <div class="prayer-full-text" id="hailMary">
+                    <div class="prayer-full-text" id="hailMary" hidden>
                         <div class="prayer-text">
                             Hail Mary, full of grace,<br>
                             the Lord is with thee;<br>
@@ -1170,11 +1197,11 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="gloryBe">
+                    <div class="prayer-header" data-prayer-id="gloryBe" role="button" tabindex="0" aria-expanded="false">
                         <span class="prayer-title">Glory Be</span>
                         <span class="expand-icon" id="gloryBeIcon">▼</span>
                     </div>
-                    <div class="prayer-full-text" id="gloryBe">
+                    <div class="prayer-full-text" id="gloryBe" hidden>
                         <div class="prayer-text">
                             Glory be to the Father,<br>
                             and to the Son,<br>
@@ -1187,11 +1214,11 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="fatimaPrayer">
+                    <div class="prayer-header" data-prayer-id="fatimaPrayer" role="button" tabindex="0" aria-expanded="false">
                         <span class="prayer-title">Fatima Prayer</span>
                         <span class="expand-icon" id="fatimaPrayerIcon">▼</span>
                     </div>
-                    <div class="prayer-full-text" id="fatimaPrayer">
+                    <div class="prayer-full-text" id="fatimaPrayer" hidden>
                         <div class="prayer-text">
                             O my Jesus, forgive us our sins,<br>
                             save us from the fires of hell,<br>
@@ -1209,11 +1236,11 @@ function updateUI() {
             mysteryInfo.style.display = 'none';
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="hailHolyQueen">
+                    <div class="prayer-header" data-prayer-id="hailHolyQueen" role="button" tabindex="0" aria-expanded="false">
                         <span class="prayer-title">Hail Holy Queen</span>
                         <span class="expand-icon" id="hailHolyQueenIcon">▼</span>
                     </div>
-                    <div class="prayer-full-text" id="hailHolyQueen">
+                    <div class="prayer-full-text" id="hailHolyQueen" hidden>
                         <div class="prayer-text">
                             Hail, holy Queen, Mother of mercy,<br>
                             our life, our sweetness and our hope.<br>
@@ -1232,8 +1259,11 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="finalPrayer">
-                    <div class="prayer-full-text" id="finalPrayer">
+                    <div class="prayer-header" data-prayer-id="finalPrayer" role="button" tabindex="0" aria-expanded="false">
+                        <span class="prayer-title">Final Prayer</span>
+                        <span class="expand-icon" id="finalPrayerIcon">▼</span>
+                    </div>
+                    <div class="prayer-full-text" id="finalPrayer" hidden>
                         <div class="prayer-text">
                             Let us pray.<br>
                             O God, whose only begotten Son,<br>
@@ -1265,6 +1295,7 @@ function updateUI() {
     }
     
     saveProgress();
+    initPrayerHeaderA11y();
 }
 
 // Next step
@@ -1315,4 +1346,20 @@ function ordinal(n) {
     const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+// Normalize headers after dynamic renders
+function initPrayerHeaderA11y() {
+    document.querySelectorAll('.prayer-header[data-prayer-id]').forEach((h) => {
+        if (!h.hasAttribute('role')) h.setAttribute('role', 'button');
+        if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '0');
+        if (!h.hasAttribute('aria-expanded')) h.setAttribute('aria-expanded', 'false');
+
+        const id = h.dataset.prayerId;
+        const panel = h.closest('.expandable-prayer')?.querySelector(`#${CSS.escape(id)}`);
+        if (panel && !panel.hasAttribute('hidden')) {
+            // Ensure closed by default
+            panel.hidden = true;
+        }
+    });
 }
