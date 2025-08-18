@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosary-companion-v1.0.3';
+const CACHE_NAME = 'rosary-companion-v1.0.4';
 
 // Install event - cache resources + skip waiting
 self.addEventListener('install', (event) => {
@@ -26,13 +26,20 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
+  // Skip non-GET requests entirely
+  if (request.method !== 'GET') {
+    return;
+  }
+
   // Prefer fresh HTML
   if (request.mode === 'navigate' || (request.destination === 'document')) {
     event.respondWith((async () => {
       try {
         const net = await fetch(request);
-        const cache = await caches.open(CACHE_NAME);
-        cache.put('./index.html', net.clone());
+        if (net.status === 200) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put('./index.html', net.clone());
+        }
         return net;
       } catch {
         return (await caches.match('./index.html')) ||
@@ -43,15 +50,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache-first
+  // Static assets: cache-first (GET requests only)
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (cached) return cached;
     
     try {
       const net = await fetch(request);
-      // Only cache GET requests
-      if (request.method === 'GET' && net.status === 200) {
+      if (net.status === 200) {
         const cache = await caches.open(CACHE_NAME);
         cache.put(request, net.clone());
       }
@@ -63,11 +69,13 @@ self.addEventListener('fetch', (event) => {
   })());
 });
 
-// Activate event - clear old caches + claim clients immediately
+// Activate event - clear ALL caches + claim clients immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
+    // Delete ALL caches to force complete refresh
     const keys = await caches.keys();
-    await Promise.all(keys.map((k) => k !== CACHE_NAME && caches.delete(k)));
+    await Promise.all(keys.map((k) => caches.delete(k)));
+    console.log('All caches cleared');
     await clients.claim();
   })());
 });
