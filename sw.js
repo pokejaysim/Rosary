@@ -1,86 +1,66 @@
-const CACHE_NAME = 'rosary-companion-v1.0.1';
-const urlsToCache = [
-  './',
-  './index.html',
-  './css/style.css',
-  './js/script.js',
-  './js/config.js',
-  './images/rosary-optimized.svg',
-  './images/rosary.svg',
-  './favicon.ico',
-  './manifest.json',
-  // Firebase CDN resources
-  'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js',
-  'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js',
-  'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'
-];
+const CACHE_NAME = 'rosary-companion-v1.0.2';
 
-// Install event - cache resources
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-      .catch(error => {
-        console.error('Failed to cache resources:', error);
-      })
-  );
+// Install event - cache resources + skip waiting
+self.addEventListener('install', (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll([
+      './',
+      './index.html',
+      './css/style.css',
+      './js/script.js',
+      './js/config.js',
+      './images/rosary-optimized.svg',
+      './images/rosary.svg',
+      './favicon.ico',
+      './manifest.json',
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js',
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js',
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js'
+    ]);
+    await self.skipWaiting();
+  })());
 });
 
-// Fetch event - serve from cache when offline
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return cached version or fetch from network
-        if (response) {
-          return response;
-        }
-        
-        // Clone the request because it's a stream
-        const fetchRequest = event.request.clone();
-        
-        return fetch(fetchRequest).then(response => {
-          // Check if we received a valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          
-          // Clone the response because it's a stream
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          
-          return response;
-        }).catch(() => {
-          // If both cache and network fail, show offline page
-          if (event.request.destination === 'document') {
-            return caches.match('/index.html');
-          }
-        });
-      })
-  );
+// Fetch event - network-first for HTML, cache-first for others
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Prefer fresh HTML
+  if (request.mode === 'navigate' || (request.destination === 'document')) {
+    event.respondWith((async () => {
+      try {
+        const net = await fetch(request);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put('./index.html', net.clone());
+        return net;
+      } catch {
+        return (await caches.match('./index.html')) ||
+               (await caches.match('index.html')) ||
+               Response.error();
+      }
+    })());
+    return;
+  }
+
+  // Static assets: cache-first
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    const net = await fetch(request);
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, net.clone());
+    return net;
+  })());
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
+// Activate event - clear old caches + claim clients immediately
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => k !== CACHE_NAME && caches.delete(k)));
+    await clients.claim();
+  })());
 });
 
 // Background sync for prayer completions

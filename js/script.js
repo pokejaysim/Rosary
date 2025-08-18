@@ -21,6 +21,16 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import config from './config.js';
 
+// --- MIGRATION: strip legacy inline onclick="togglePrayer(...)" anywhere in the DOM ---
+function stripLegacyToggleOnclick(root = document) {
+  root.querySelectorAll('[onclick]').forEach((el) => {
+    const code = String(el.getAttribute('onclick') || '');
+    if (code.includes('togglePrayer')) {
+      el.removeAttribute('onclick');
+    }
+  });
+}
+
 // Firebase configuration from environment variables
 const firebaseConfig = config.firebase;
 
@@ -55,8 +65,9 @@ function togglePrayer(prayerId) {
     }
 }
 
-// Attach UI event handlers after DOM is ready
+// Run once on load
 document.addEventListener('DOMContentLoaded', () => {
+    stripLegacyToggleOnclick();
     document.getElementById('btnGoogle').addEventListener('click', signInWithGoogle);
     document.getElementById('btnEmail').addEventListener('click', showEmailLogin);
     document.getElementById('btnAnonymous').addEventListener('click', continueAsGuest);
@@ -93,6 +104,56 @@ document.addEventListener('DOMContentLoaded', () => {
             togglePrayer(header.dataset.prayerId);
         }
     });
+
+    // Add a "just in case" bridge for stray inline elements
+    document.addEventListener('click', (event) => {
+        const maybeInline = event.target.closest('[onclick]');
+        if (!maybeInline) return;
+        const code = String(maybeInline.getAttribute('onclick') || '');
+        if (!code.includes('togglePrayer')) return;
+
+        // Derive the id like our headers do
+        const header = maybeInline.closest('.prayer-header[data-prayer-id]') || maybeInline;
+        const id = header?.dataset?.prayerId;
+        if (id) {
+            event.preventDefault();
+            togglePrayer(id);
+        }
+    });
+
+    // Delegated handler for notification close buttons
+    document.addEventListener('click', (event) => {
+        const closeBtn = event.target.closest('[data-action="close-notification"]');
+        if (closeBtn) {
+            const notification = closeBtn.closest('.error-notification, .success-notification, .shortcuts-notification');
+            if (notification) {
+                notification.remove();
+            }
+        }
+    });
+});
+
+// Watch for newly injected inline handlers and remove them
+const legacyInlineObserver = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+        if (m.type === 'attributes' && m.attributeName === 'onclick') {
+            const el = m.target;
+            const code = String(el.getAttribute('onclick') || '');
+            if (code.includes('togglePrayer')) {
+                el.removeAttribute('onclick');
+            }
+        } else if (m.type === 'childList' && m.addedNodes.length) {
+            for (const n of m.addedNodes) {
+                if (n.nodeType === 1) stripLegacyToggleOnclick(n);
+            }
+        }
+    }
+});
+legacyInlineObserver.observe(document.documentElement, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['onclick'],
+    childList: true,
 });
 
 // Current user
@@ -620,7 +681,7 @@ function showErrorNotification(message) {
         <div class="error-content">
             <span class="error-icon">⚠️</span>
             <span class="error-message">${message}</span>
-            <button class="error-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            <button class="error-close" data-action="close-notification">×</button>
         </div>
     `;
     
@@ -642,7 +703,7 @@ function showSuccessNotification(message) {
         <div class="success-content">
             <span class="success-icon">✅</span>
             <span class="success-message">${message}</span>
-            <button class="success-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            <button class="success-close" data-action="close-notification">×</button>
         </div>
     `;
     
@@ -658,7 +719,9 @@ function showSuccessNotification(message) {
 
 // Global error handler
 window.addEventListener('error', (event) => {
-    console.error('Global error:', event.error);
+    const msg = String(event?.error?.message || event?.message || '');
+    if (msg.includes('togglePrayer is not defined')) return; // ignore legacy noise
+    console.error('Global error:', event.error || msg);
     showErrorNotification('An unexpected error occurred. Please refresh the page if problems persist.');
 });
 
@@ -796,7 +859,7 @@ function showKeyboardShortcuts() {
     notification.innerHTML = `
         <div class="shortcuts-content">
             ${shortcuts}
-            <button class="shortcuts-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            <button class="shortcuts-close" data-action="close-notification">×</button>
         </div>
     `;
     
@@ -1296,6 +1359,7 @@ function updateUI() {
     
     saveProgress();
     initPrayerHeaderA11y();
+    stripLegacyToggleOnclick(); // sanitize any templates that might still have inline handlers
 }
 
 // Next step
