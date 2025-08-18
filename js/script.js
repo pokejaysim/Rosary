@@ -55,6 +55,9 @@ function togglePrayer(prayerId) {
 // Export to global scope for inline handlers
 window.togglePrayer = togglePrayer;
 
+// Debug: Test function is accessible
+console.log('togglePrayer function exported:', typeof window.togglePrayer);
+
 // Attach UI event handlers after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnGoogle').addEventListener('click', signInWithGoogle);
@@ -91,6 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             togglePrayer(header.dataset.prayerId);
+        }
+    });
+
+    // Backup delegated handler for prayer headers (in case inline fails)
+    document.addEventListener('click', (event) => {
+        const prayerHeader = event.target.closest('.prayer-header[data-prayer-id]');
+        if (prayerHeader) {
+            const prayerId = prayerHeader.dataset.prayerId;
+            console.log('Delegated click on:', prayerId);
+            togglePrayer(prayerId);
         }
     });
 
@@ -940,12 +953,6 @@ document.addEventListener('DOMContentLoaded', () => {
 async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         try {
-            // Force unregister old service worker first
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (let registration of registrations) {
-                await registration.unregister();
-            }
-            
             const registration = await navigator.serviceWorker.register('./sw.js');
             console.log('ServiceWorker registered successfully');
             
