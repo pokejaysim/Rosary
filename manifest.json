@@ -35,11 +35,12 @@
       "name": "Start New Rosary",
       "short_name": "New Rosary",
       "description": "Begin a new rosary prayer session",
-      "url": "/#new-rosary",
+      "url": "./",
       "icons": [
         {
           "src": "images/rosary-optimized.svg",
-          "sizes": "96x96"
+          "sizes": "96x96",
+          "type": "image/svg+xml"
         }
       ]
     }

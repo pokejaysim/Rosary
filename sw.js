@@ -47,10 +47,19 @@ self.addEventListener('fetch', (event) => {
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (cached) return cached;
-    const net = await fetch(request);
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, net.clone());
-    return net;
+    
+    try {
+      const net = await fetch(request);
+      // Only cache GET requests
+      if (request.method === 'GET' && net.status === 200) {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, net.clone());
+      }
+      return net;
+    } catch (error) {
+      console.log('Fetch failed:', error);
+      throw error;
+    }
   })());
 });
 
