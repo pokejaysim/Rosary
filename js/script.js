@@ -21,15 +21,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import config from './config.js';
 
-// --- MIGRATION: strip legacy inline onclick="togglePrayer(...)" anywhere in the DOM ---
-function stripLegacyToggleOnclick(root = document) {
-  root.querySelectorAll('[onclick]').forEach((el) => {
-    const code = String(el.getAttribute('onclick') || '');
-    if (code.includes('togglePrayer')) {
-      el.removeAttribute('onclick');
-    }
-  });
-}
+// Simple prayer toggle (no longer removing inline handlers)
 
 // Firebase configuration from environment variables
 const firebaseConfig = config.firebase;
@@ -39,35 +31,32 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Accessible toggle for any prayer section
+// Simple, bulletproof prayer toggle
 function togglePrayer(prayerId) {
-    // Find the section via the header
-    const header = document.querySelector(
-        `.prayer-header[data-prayer-id="${CSS.escape(prayerId)}"]`
-    );
-    if (!header) return;
-
-    const section = header.closest('.expandable-prayer');
-    const panel = section?.querySelector(`#${CSS.escape(prayerId)}`);
-    const icon = section?.querySelector(`#${CSS.escape(prayerId)}Icon`);
-
-    const expanded = header.getAttribute('aria-expanded') === 'true';
-    const next = !expanded;
-
-    header.setAttribute('aria-expanded', String(next));
-
-    if (panel) {
-        panel.hidden = !next;
-        panel.classList.toggle('expanded', next); // keep existing CSS happy
-    }
-    if (icon) {
-        icon.classList.toggle('expanded', next);
+    const panel = document.getElementById(prayerId);
+    const icon = document.getElementById(prayerId + 'Icon');
+    
+    if (!panel) return;
+    
+    // Simple toggle - if hidden, show it; if visible, hide it
+    if (panel.style.display === 'none' || panel.style.display === '' || panel.hidden) {
+        panel.style.display = 'block';
+        panel.hidden = false;
+        panel.classList.add('expanded');
+        if (icon) icon.textContent = '▲';
+    } else {
+        panel.style.display = 'none';
+        panel.hidden = true;
+        panel.classList.remove('expanded');
+        if (icon) icon.textContent = '▼';
     }
 }
 
-// Run once on load
+// Export to global scope for inline handlers
+window.togglePrayer = togglePrayer;
+
+// Attach UI event handlers after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    stripLegacyToggleOnclick();
     document.getElementById('btnGoogle').addEventListener('click', signInWithGoogle);
     document.getElementById('btnEmail').addEventListener('click', showEmailLogin);
     document.getElementById('btnAnonymous').addEventListener('click', continueAsGuest);
@@ -105,22 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add a "just in case" bridge for stray inline elements
-    document.addEventListener('click', (event) => {
-        const maybeInline = event.target.closest('[onclick]');
-        if (!maybeInline) return;
-        const code = String(maybeInline.getAttribute('onclick') || '');
-        if (!code.includes('togglePrayer')) return;
-
-        // Derive the id like our headers do
-        const header = maybeInline.closest('.prayer-header[data-prayer-id]') || maybeInline;
-        const id = header?.dataset?.prayerId;
-        if (id) {
-            event.preventDefault();
-            togglePrayer(id);
-        }
-    });
-
     // Delegated handler for notification close buttons
     document.addEventListener('click', (event) => {
         const closeBtn = event.target.closest('[data-action="close-notification"]');
@@ -131,29 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-});
-
-// Watch for newly injected inline handlers and remove them
-const legacyInlineObserver = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-        if (m.type === 'attributes' && m.attributeName === 'onclick') {
-            const el = m.target;
-            const code = String(el.getAttribute('onclick') || '');
-            if (code.includes('togglePrayer')) {
-                el.removeAttribute('onclick');
-            }
-        } else if (m.type === 'childList' && m.addedNodes.length) {
-            for (const n of m.addedNodes) {
-                if (n.nodeType === 1) stripLegacyToggleOnclick(n);
-            }
-        }
-    }
-});
-legacyInlineObserver.observe(document.documentElement, {
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['onclick'],
-    childList: true,
 });
 
 // Current user
@@ -1152,7 +1102,7 @@ function updateUI() {
             mysteryInfo.style.display = 'none';
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="apostlesCreed" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="apostlesCreed" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('apostlesCreed')">
                         <span class="prayer-title">The Apostles' Creed</span>
                         <span class="expand-icon" id="apostlesCreedIcon">▼</span>
                     </div>
@@ -1181,7 +1131,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="ourFather" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="ourFather" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('ourFather')">
                         <span class="prayer-title">Our Father</span>
                         <span class="expand-icon" id="ourFatherIcon">▼</span>
                     </div>
@@ -1221,7 +1171,7 @@ function updateUI() {
             
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="ourFatherDecade" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="ourFatherDecade" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('ourFatherDecade')">
                         <span class="prayer-title">Our Father</span>
                         <span class="expand-icon" id="ourFatherDecadeIcon">▼</span>
                     </div>
@@ -1242,7 +1192,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="hailMary" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="hailMary" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('hailMary')">
                         <span class="prayer-title">Hail Mary (10 times)</span>
                         <span class="expand-icon" id="hailMaryIcon">▼</span>
                     </div>
@@ -1260,7 +1210,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="gloryBe" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="gloryBe" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('gloryBe')">
                         <span class="prayer-title">Glory Be</span>
                         <span class="expand-icon" id="gloryBeIcon">▼</span>
                     </div>
@@ -1277,7 +1227,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="fatimaPrayer" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="fatimaPrayer" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('fatimaPrayer')">
                         <span class="prayer-title">Fatima Prayer</span>
                         <span class="expand-icon" id="fatimaPrayerIcon">▼</span>
                     </div>
@@ -1299,7 +1249,7 @@ function updateUI() {
             mysteryInfo.style.display = 'none';
             prayerContent.innerHTML = `
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="hailHolyQueen" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="hailHolyQueen" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('hailHolyQueen')">
                         <span class="prayer-title">Hail Holy Queen</span>
                         <span class="expand-icon" id="hailHolyQueenIcon">▼</span>
                     </div>
@@ -1322,7 +1272,7 @@ function updateUI() {
                 </div>
 
                 <div class="expandable-prayer">
-                    <div class="prayer-header" data-prayer-id="finalPrayer" role="button" tabindex="0" aria-expanded="false">
+                    <div class="prayer-header" data-prayer-id="finalPrayer" role="button" tabindex="0" aria-expanded="false" onclick="togglePrayer('finalPrayer')">
                         <span class="prayer-title">Final Prayer</span>
                         <span class="expand-icon" id="finalPrayerIcon">▼</span>
                     </div>
@@ -1359,7 +1309,6 @@ function updateUI() {
     
     saveProgress();
     initPrayerHeaderA11y();
-    stripLegacyToggleOnclick(); // sanitize any templates that might still have inline handlers
 }
 
 // Next step

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosary-companion-v1.0.2';
+const CACHE_NAME = 'rosary-companion-v1.0.3';
 
 // Install event - cache resources + skip waiting
 self.addEventListener('install', (event) => {
