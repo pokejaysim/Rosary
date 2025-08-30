@@ -157,16 +157,11 @@ const mysteries = {
 let currentStep = 0;
 let currentMystery = 'joyful';
 let currentDecade = 0;
-let completedRosaries = 0;
-let currentStreak = 0;
 let currentBeadPosition = 0; // 0 = Our Father, 1-10 = Hail Marys, 11 = Glory Be
 let sessionData = {
     currentStep: 0,
     currentMystery: 'joyful',
     currentDecade: 0,
-    completedRosaries: 0,
-    currentStreak: 0,
-    lastCompletedDate: null,
     timestamp: Date.now()
 };
 
@@ -248,9 +243,6 @@ async function signOut() {
     try {
         await firebaseSignOut(auth);
         // Reset to default state
-        completedRosaries = 0;
-        currentStreak = 0;
-        updateStats();
     } catch (error) {
         console.error('Error signing out:', error);
     }
@@ -265,9 +257,6 @@ async function loadUserData() {
         
         if (userDoc.exists()) {
             const data = userDoc.data().rosaryData || {};
-            completedRosaries = data.totalCompleted || 0;
-            currentStreak = data.currentStreak || 0;
-            sessionData.lastCompletedDate = data.lastCompletedDate;
             
             // Check for unfinished session
             if (data.currentSession && data.currentSession.step !== undefined) {
@@ -278,8 +267,7 @@ async function loadUserData() {
                         currentStep: session.step,
                         currentMystery: session.mystery,
                         currentDecade: session.decade || 0,
-                        timestamp: session.startedAt,
-                        lastCompletedDate: data.lastCompletedDate
+                        timestamp: session.startedAt
                     };
                     // Only show restore if not on first step
                     if (session.step > 0 && session.step < 7) {
@@ -287,8 +275,6 @@ async function loadUserData() {
                     }
                 }
             }
-            
-            updateStats();
         } else {
             // Create new user document
             await setDoc(doc(db, 'users', currentUser.uid), {
@@ -298,9 +284,6 @@ async function loadUserData() {
                     createdAt: serverTimestamp()
                 },
                 rosaryData: {
-                    totalCompleted: 0,
-                    currentStreak: 0,
-                    longestStreak: 0,
                     completionHistory: []
                 }
             });
@@ -347,38 +330,13 @@ async function saveProgress() {
 
 // Complete rosary and save to Firestore
 async function completeRosary() {
-    completedRosaries++;
-    
-    // Update streak logic
-    const today = new Date().toDateString();
-    const lastCompleted = sessionData.lastCompletedDate;
-    
-    if (!lastCompleted || lastCompleted !== today) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        if (lastCompleted === yesterday.toDateString()) {
-            currentStreak++;
-        } else {
-            currentStreak = 1;
-        }
-    }
-    
-    updateStats();
-    
     // Save to Firestore if user is authenticated
     if (currentUser) {
         try {
             const userRef = doc(db, 'users', currentUser.uid);
-            const userDoc = await getDoc(userRef);
-            const currentData = userDoc.data()?.rosaryData || {};
-            const longestStreak = Math.max(currentStreak, currentData.longestStreak || 0);
+            const today = new Date().toDateString();
             
             await updateDoc(userRef, {
-                'rosaryData.totalCompleted': completedRosaries,
-                'rosaryData.currentStreak': currentStreak,
-                'rosaryData.longestStreak': longestStreak,
-                'rosaryData.lastCompletedDate': today,
                 'rosaryData.currentSession': deleteField(),
                 'rosaryData.completionHistory': arrayUnion({
                     date: today,
@@ -387,32 +345,16 @@ async function completeRosary() {
                 })
             });
             
-            // Update global statistics
-            updateGlobalStats();
-            showSuccessNotification('Rosary completed and saved! 🙏');
+            showSuccessNotification('Rosary completed! 🙏');
         } catch (error) {
             console.error('Error saving completion:', error);
             handleFirestoreError(error, 'save your completed rosary');
         }
+    } else {
+        showSuccessNotification('Rosary completed! 🙏');
     }
 }
 
-// Update global statistics
-async function updateGlobalStats() {
-    try {
-        const globalRef = doc(db, 'global', 'stats');
-        await updateDoc(globalRef, {
-            totalRosariesPrayed: increment(1),
-            lastUpdated: serverTimestamp()
-        });
-    } catch (error) {
-        // Create the document if it doesn't exist
-        await setDoc(doc(db, 'global', 'stats'), {
-            totalRosariesPrayed: 1,
-            lastUpdated: serverTimestamp()
-        });
-    }
-}
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -1019,18 +961,6 @@ function startFresh() {
     updateUI();
 }
 
-// Update stats display
-function updateStats() {
-    const totalRosariesEl = document.getElementById('totalRosaries');
-    const dayStreakEl = document.getElementById('dayStreak');
-    
-    if (totalRosariesEl) {
-        totalRosariesEl.textContent = completedRosaries;
-    }
-    if (dayStreakEl) {
-        dayStreakEl.textContent = currentStreak;
-    }
-}
 
 // Update today's mystery
 function updateTodaysMystery() {

@@ -27,7 +27,6 @@ body {
 
 /* Enhanced Visual Design */
 .auth-section,
-.stats-section,
 .mystery-selector,
 .prayer-section {
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -35,7 +34,6 @@ body {
 }
 
 .auth-section::before,
-.stats-section::before,
 .mystery-selector::before,
 .prayer-section::before {
     content: '';
@@ -193,7 +191,6 @@ h1, h2, h3 {
 }
 
 [data-theme="dark"] .auth-section,
-[data-theme="dark"] .stats-section,
 [data-theme="dark"] .mystery-selector,
 [data-theme="dark"] .prayer-section {
     background: var(--bg-secondary);
@@ -735,13 +732,6 @@ h1, h2, h3 {
         font-size: 0.95rem;
     }
     
-    .stats-display {
-        gap: 20px;
-    }
-    
-    .stat-number {
-        font-size: 1.8rem;
-    }
     
     .prayer-section {
         padding: 25px;
@@ -766,10 +756,6 @@ h1, h2, h3 {
         grid-template-columns: 1fr;
     }
     
-    .stats-display {
-        flex-direction: column;
-        gap: 15px;
-    }
     
     .prayer-section {
         padding: 20px;
@@ -989,49 +975,6 @@ button:focus,
     transform: translateY(-1px);
 }
 
-.stats-section {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-    margin-bottom: 25px;
-    transition: all 0.3s ease;
-}
-
-.stats-section:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-}
-
-.stats-display {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 10px;
-}
-
-.stat-number {
-    display: block;
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 5px;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    font-weight: 500;
-}
 
 .loading-spinner {
     display: inline-block;
