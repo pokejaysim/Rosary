@@ -193,9 +193,6 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('userName').textContent = 
             user.displayName || user.email || 'Guest User';
         
-        // Show loading state for user data
-        showLoadingState(document.getElementById('statsDisplay'), 'Loading your statistics...');
-        
         // Load user data from Firestore
         loadUserData().catch(() => {
             console.error('Failed to load user data, but continuing...');
@@ -434,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Hide loading overlay after Firebase is initialized and DOM is ready
     setTimeout(() => {
         hideLoadingOverlay();
-    }, 1500); // Minimum loading time for better UX
+    }, 800); // Minimum loading time for better UX
 });
 
 // Dark mode functionality
